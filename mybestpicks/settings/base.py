@@ -182,6 +182,10 @@ SITE_URL = env("SITE_URL", default="http://localhost:8000")
 # indexable unless explicitly configured otherwise.
 BLOCK_SEARCH_INDEXING = env.bool("BLOCK_SEARCH_INDEXING", default=False)
 
+# Editorial QA audit (module 10): a product's last fact-check, or an offer's last
+# manual link check, counts as stale after this many days.
+EDITORIAL_AUDIT_STALE_DAYS = env.int("EDITORIAL_AUDIT_STALE_DAYS", default=30)
+
 # Allowed file extensions for documents in the document library.
 # See https://docs.wagtail.org/en/stable/advanced_topics/deploying.html#user-uploaded-files
 WAGTAILDOCS_EXTENSIONS = [

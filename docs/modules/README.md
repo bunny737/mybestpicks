@@ -16,7 +16,7 @@ MBP-0xx ticket numbers ([../mybestpicks_plan_v4.md §14](../mybestpicks_plan_v4.
 | 5 | 04 | Editorial blocks (ProductCard, ComparisonTable, …) | 04-editorial-blocks.md | P0 | 03, 05 | 3–5 | ✅ |
 | 6 | 06 | Trust, privacy and SEO | 06-trust-privacy-seo.md | P0 | 02, 03, 04 | 2 (legal pages) · 4 (sitemap, RSS, Telegram link) | 🟨 |
 | 7 | 08 | Internal search | 08-search.md | P1 | 02, 03 | 7 | ✅ |
-| 8 | 10 | Editorial QA tooling | 10-editorial-qa.md | P1 | 04, 05 | 6–8 | ⬜ |
+| 8 | 10 | Editorial QA tooling | 10-editorial-qa.md | P1 | 04, 05 | 6–8 | ✅ |
 | 9 | 07 | Release pipeline (VPS, Compose, Nginx, backups). **Held: no deploy until development is finished (owner, 2026-11-02)** | 07-release-pipeline.md | P0 | 01–06, 08, 10 | after development (plan had week 2) | ⬜ |
 | 10 | 09 | Metrics (Search Console, Umami, UTMs; needs a live site) | 09-metrics.md | P1 | 06, 07 | after 07 | ⬜ |
 | 11 | 14 | Telegram posting integration (optional) | 14-telegram-posting.md | P2 | 03, 06, 09 | post-launch | ⬜ |

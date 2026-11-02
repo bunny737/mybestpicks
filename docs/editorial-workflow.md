@@ -19,7 +19,11 @@ Never present a list based only on research as a hands-on review.
 6. Review on mobile, then publish once it is live. Update internal links and check
    indexing.
 7. Audit existing claims, especially headlines that depend on price, against their
-   verification dates.
+   verification dates: run `python manage.py editorial_audit` (stale price claims,
+   missing image evidence, discontinued-product references, stale offer checks,
+   unsupported hands-on claims) and `python manage.py check_internal_links`
+   (broken page/document links, dead hrefs, stale related-article and
+   featured-guide picks). Both only report; neither edits content.
 8. Share one useful Telegram summary with a tracked link where it is relevant
    ([telegram-distribution.md](telegram-distribution.md)), and collect reader
    questions for the next guide.
