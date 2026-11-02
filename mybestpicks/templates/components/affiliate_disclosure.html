@@ -1,5 +1,9 @@
+{% load wagtailcore_tags %}
 {# Rendered ONCE, before the first CTA, and only when an offer will render. #}
 <aside class="affiliate-disclosure alert alert-light border small prose" role="note" aria-label="Affiliate disclosure">
     Some links on this page are affiliate links. If you buy through one, we may earn a
     commission at no extra cost to you. It does not change what we recommend.
+    {% if affiliate_disclosure_page %}
+    <a href="{% pageurl affiliate_disclosure_page %}">Read our affiliate disclosure</a>.
+    {% endif %}
 </aside>

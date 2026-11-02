@@ -242,6 +242,14 @@ class ArticlePage(Page):
         products = resolve_article_products(self.body)
         context["article_products"] = products.entries
         context["has_active_offers"] = products.has_active_offers
+        context["affiliate_disclosure_page"] = (
+            StandardPage.objects.live()
+            .public()
+            .filter(slug="affiliate-disclosure")
+            .first()
+            if products.has_active_offers
+            else None
+        )
         context["first_cta_block_id"] = products.first_cta_block_id
         context["quick_picks"] = [
             entry for entry in products.entries if entry.card["recommendation_label"]

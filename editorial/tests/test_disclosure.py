@@ -15,7 +15,14 @@ from catalog.tests.helpers import (
 )
 from editorial.models import DiscoveryMode
 
-from .helpers import card_block, make_article, make_author, make_category, table_block
+from .helpers import (
+    card_block,
+    make_article,
+    make_author,
+    make_category,
+    make_standard_page,
+    table_block,
+)
 
 MARKER = "affiliate-disclosure"
 
@@ -108,3 +115,14 @@ class DisclosureTests(TestCase):
         for word in ("Amazon", "Associate", "Flipkart", "Cuelinks", "price"):
             self.assertNotIn(word, text)
         self.assertIn("affiliate links", text)
+
+    def test_disclosure_links_to_the_live_policy_page_when_it_exists(self):
+        policy = make_standard_page(
+            title="Affiliate Disclosure", slug="affiliate-disclosure"
+        )
+        make_offer(self.product, self.merchant)
+
+        self.assertContains(
+            self.client.get(self.article.url),
+            f'href="{policy.url}">Read our affiliate disclosure</a>',
+        )

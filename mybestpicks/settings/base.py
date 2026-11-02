@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "seo.middleware.SearchIndexingProtectionMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -176,6 +177,10 @@ WAGTAILADMIN_BASE_URL = env("WAGTAILADMIN_BASE_URL", default="http://localhost:8
 
 # Public site URL, for canonical links, feeds and structured data.
 SITE_URL = env("SITE_URL", default="http://localhost:8000")
+
+# Set true for any public staging or review environment. Production remains
+# indexable unless explicitly configured otherwise.
+BLOCK_SEARCH_INDEXING = env.bool("BLOCK_SEARCH_INDEXING", default=False)
 
 # Allowed file extensions for documents in the document library.
 # See https://docs.wagtail.org/en/stable/advanced_topics/deploying.html#user-uploaded-files

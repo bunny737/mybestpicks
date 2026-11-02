@@ -85,6 +85,13 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
 - [ ] No critical broken internal links
 
 ## Open questions / Decisions
+- [DECISION 2026-11-02] Article pages emit truthful `BlogPosting` JSON-LD plus
+  `BreadcrumbList`; category hubs emit `BreadcrumbList`. FAQ rich-result markup is
+  omitted because this general shopping publication is not eligible under Google's
+  current FAQ rich-result restrictions. No review or rating markup is generated.
+- [DECISION 2026-11-02] `BLOCK_SEARCH_INDEXING=True` adds an
+  `X-Robots-Tag: noindex, nofollow` header to every staging/review response. It is
+  false by default so production articles are never blocked accidentally.
 - [DECISION 2026-11-02] Canonical, sitemap, robots and RSS origins use the
   environment-backed `SITE_URL`. Query strings are stripped from canonical URLs;
   RSS item URLs never carry campaign parameters.
@@ -106,3 +113,7 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
 - 2026-11-02  Added sitemap, robots.txt, canonical/feed discovery links, RSS and
   the validated Telegram site setting/CTAs. Policy pages, JSON-LD and optional
   email signup remain for later slices.
+- 2026-11-02  Added article/category JSON-LD, metadata fallbacks, explicit search
+  noindex, environment-wide staging noindex protection and conditional linking
+  from the in-article notice to a live Affiliate Disclosure page. Policy copy,
+  email signup and the consent decision remain open.
