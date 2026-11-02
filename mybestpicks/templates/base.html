@@ -84,7 +84,7 @@
         <div class="container">
             <div class="row gy-4">
                 <div class="col-lg-5 col-md-12">
-                    <p class="fw-bold fs-5 mb-2 text-white">MyBestPicks</p>
+                    <h2 class="fw-bold fs-5 mb-2 text-white">MyBestPicks</h2>
                     <p class="small text-secondary mb-3">
                         Independent buying guides, rigorous product comparisons, and honest explainers built specifically for shoppers in India. We verify specs, test where possible, and never recommend products solely for commission.
                     </p>
@@ -99,7 +99,7 @@
                 {# Categories are repeated here so navigation still works without JavaScript. #}
                 {% if nav_categories %}
                 <nav class="col-6 col-md-3 col-lg-3" aria-label="Categories">
-                    <p class="fw-semibold text-white mb-3">Categories</p>
+                    <h2 class="fw-semibold text-white mb-3 fs-6">Categories</h2>
                     <ul class="list-unstyled mb-0">
                         {% for category in nav_categories %}
                         <li class="mb-2"><a href="{% pageurl category %}">{{ category.title }}</a></li>
@@ -109,7 +109,7 @@
                 {% endif %}
                 {% if footer_pages %}
                 <nav class="col-6 col-md-3 col-lg-4" aria-label="About and policies">
-                    <p class="fw-semibold text-white mb-3">About &amp; Policies</p>
+                    <h2 class="fw-semibold text-white mb-3 fs-6">About &amp; Policies</h2>
                     <ul class="list-unstyled mb-0">
                         {% for footer_page in footer_pages %}
                         <li class="mb-2"><a href="{% pageurl footer_page %}">{{ footer_page.title }}</a></li>
