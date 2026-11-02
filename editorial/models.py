@@ -8,6 +8,7 @@ the sitemap, robots meta) goes through ``CategoryPage.objects.discoverable()`` o
 """
 
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import models
 from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery, Value
 from django.db.models.functions import Coalesce
@@ -108,6 +109,47 @@ class ArticlePageTag(TaggedItemBase):
     )
 
 
+class SourceType(models.TextChoices):
+    MANUFACTURER = "manufacturer", "Manufacturer spec or page"
+    DATASHEET = "datasheet", "Standard or datasheet"
+    REVIEW = "review", "Independent review"
+    RETAILER = "retailer", "Retailer listing (for fact-checking only)"
+    OTHER = "other", "Other"
+
+
+class ArticleSource(Orderable):
+    """
+    A source consulted for an article, kept for the research audit. Private unless
+    ``is_public`` is ticked, in which case it is listed under the article's sources.
+    """
+
+    article = ParentalKey(
+        "editorial.ArticlePage", related_name="sources", on_delete=models.CASCADE
+    )
+    source_name = models.CharField(max_length=200)
+    url = models.URLField(
+        max_length=2000, validators=[URLValidator(schemes=["http", "https"])]
+    )
+    accessed_on = models.DateField()
+    source_type = models.CharField(
+        max_length=20, choices=SourceType.choices, default=SourceType.MANUFACTURER
+    )
+    is_public = models.BooleanField(
+        default=False, help_text="List this source at the end of the article."
+    )
+
+    panels = [
+        FieldPanel("source_name"),
+        FieldPanel("url"),
+        FieldPanel("accessed_on"),
+        FieldPanel("source_type"),
+        FieldPanel("is_public"),
+    ]
+
+    def __str__(self):
+        return self.source_name
+
+
 class ArticlePage(Page):
     """
     A buying guide, comparison, explainer or tutorial.
@@ -171,6 +213,7 @@ class ArticlePage(Page):
         FieldPanel("methodology"),
         FieldPanel("reviewed_date"),
         FieldPanel("tags"),
+        InlinePanel("sources", label="Source", heading="Research sources"),
     ]
 
     def clean(self):
@@ -191,6 +234,7 @@ class ArticlePage(Page):
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
+        context["public_sources"] = [s for s in self.sources.all() if s.is_public]
         # Other live guides in the same hub. Module 04 extends this context with
         # the precomputed ``article_products`` (rendering contract).
         context["related_articles"] = (

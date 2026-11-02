@@ -31,6 +31,14 @@ and test fixtures. The human process is in
 - Fixtures and factories for HomePage → CategoryPage → ArticlePage trees, plus
   products and offers, for use in tests across modules.
 
+## Hooks from module 05
+- `Product.status` and `last_verified_at`, and `MerchantOffer.last_checked_at`, are
+  plain fields (dates) to compare with the configurable threshold.
+- `MerchantOffer.is_renderable` and `.objects.renderable()` identify offers that
+  currently show. A discontinued product's offers already stop rendering; this module
+  reports the *articles* that still reference it.
+- `ArticleSource` rows (accessed dates, types) feed the research audit.
+
 ## Business rules
 1. The audit never edits content by itself. It only reports.
 2. The thresholds come from settings, not constants spread through the code.

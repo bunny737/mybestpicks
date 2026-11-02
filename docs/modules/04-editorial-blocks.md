@@ -30,6 +30,17 @@ ComparisonTableBlock  card_ids (optional subset of this article's product cards,
 FAQBlock, SourceNoteBlock, RelatedArticlesBlock
 ```
 
+## What module 05 provides for this module
+- `Product.spec_rows` / `catalog.specs.spec_rows()`: ordered, labelled, unit-aware
+  rows, with `value=None` for unrecorded specs (show a dash). Use `comparable` to pick
+  comparison columns.
+- `MerchantOffer.objects.renderable().select_related("merchant", "product")` for the
+  batch query, then keep only offers whose `is_renderable` is true (it re-checks the
+  link host against the merchant's current allowlist and costs no query).
+- `Merchant.cta_label` for the button text ("View at Flipkart", or the merchant's own
+  text). Offers render as `rel="sponsored nofollow noopener"` in the same tab.
+- `Product.image_provenance` and `image_credit`, for credit lines.
+
 ## Rendering contract (CLAUDE.md invariant 4)
 `ArticlePage.get_context()`:
 1. Walks `body` and collects every `ProductCardBlock`, in order, with its block id.

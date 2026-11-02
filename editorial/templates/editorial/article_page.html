@@ -44,6 +44,20 @@
         {% include_block page.body %}
     </div>
 
+    {% if public_sources %}
+    <section class="prose mt-5" aria-labelledby="sources-heading">
+        <h2 id="sources-heading" class="h4">Sources</h2>
+        <ul>
+            {% for source in public_sources %}
+            <li>
+                <a href="{{ source.url }}" rel="noopener nofollow">{{ source.source_name }}</a>
+                <span class="text-body-secondary">(accessed {{ source.accessed_on|date:"j F Y" }})</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
     {% with tags=page.tags.all %}
     {% if tags %}
     <ul class="list-inline mt-4" aria-label="Tags">
