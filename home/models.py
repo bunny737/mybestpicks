@@ -1,11 +1,37 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import F
 from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import FieldPanel, InlinePanel
+from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.fields import RichTextField
 from wagtail.models import Orderable, Page
 
 from editorial.models import ArticleKind, ArticlePage, CategoryPage
+
+telegram_url_validator = RegexValidator(
+    regex=r"^https://t\.me/[A-Za-z0-9_]+/?$",
+    message="Enter a Telegram channel URL such as https://t.me/mybestpicks.",
+)
+
+
+@register_setting
+class SiteSettings(BaseSiteSetting):
+    """Public, per-site settings. Secrets must never be stored here."""
+
+    telegram_channel_url = models.URLField(
+        blank=True,
+        validators=[telegram_url_validator],
+        help_text="Public channel URL. Leave blank to hide every Telegram link.",
+    )
+    telegram_channel_label = models.CharField(
+        max_length=80, blank=True, default="Join on Telegram"
+    )
+
+    panels = [
+        FieldPanel("telegram_channel_url"),
+        FieldPanel("telegram_channel_label"),
+    ]
 
 
 class HomePage(Page):

@@ -1,0 +1,6 @@
+{% with site_settings=settings.home.SiteSettings %}
+{% if site_settings.telegram_channel_url %}
+<a class="btn btn-outline-primary" href="{{ site_settings.telegram_channel_url }}"
+   rel="noopener">{{ site_settings.telegram_channel_label|default:"Join on Telegram" }}</a>
+{% endif %}
+{% endwith %}

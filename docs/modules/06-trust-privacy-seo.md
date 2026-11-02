@@ -3,7 +3,7 @@
 > Keep this file in sync with the code AT ALL TIMES.
 > If the code and this file disagree, this file is wrong. Fix it in the same commit.
 
-**Status:** Not Started
+**Status:** In Progress (decision-free SEO/RSS/Telegram slice complete)
 **Priority:** P0
 **Ticket:** MBP-006
 **Plan reference:** docs/mybestpicks_plan_v4.md §5, §6 (compliance), §7, §11 (RSS, email, Telegram MVP)
@@ -18,12 +18,12 @@ consent controls.
 
 ## Data model (as planned; update to as-built)
 ```
-Model: SiteSettings (BaseSiteSetting)   app: home
+Model: SiteSettings (BaseSiteSetting, per Wagtail Site)   app: home
   telegram_channel_url     URL, blank; validated https://t.me/…; nothing renders when blank
   telegram_channel_label   optional, default "Join on Telegram"
-  contact_email
-  social links (LinkedIn, …)
-  analytics_enabled / umami_website_id   nonsecret, used by module 09
+  contact_email            deferred with policy/contact-page work
+  social links             deferred; no current requirement to render them
+  analytics fields         deferred to module 09/privacy review
   NO secrets (no bot token, no API keys)
 
 Model: EmailSubscriber   app: home   (only if consent/unsubscribe can be operated; see Decisions)
@@ -32,9 +32,9 @@ Model: EmailSubscriber   app: home   (only if consent/unsubscribe can be operate
 
 ## Pages, URLs
 ```
-/sitemap.xml        wagtail.contrib.sitemaps, live, canonical, indexable pages only
-/robots.txt         allows production, references the sitemap, blocks /admin/ and /search/
-/feed/              RSS of live ArticlePages (newest first), linked in <head> and the footer
+/sitemap.xml        Wagtail sitemap, canonical SITE_URL origin; hidden hubs/drafts/private pages omitted
+/robots.txt         allows content, references sitemap; blocks /admin/, /django-admin/ and /search/
+/feed/              RSS 2.0 of the 20 newest live public ArticlePages; canonical item links
 /search/            module 08
 /admin/             Wagtail admin (access controls: module 07)
 StandardPages       About, Contact, Editorial Policy, Affiliate Disclosure, Privacy Policy, Terms
@@ -85,6 +85,14 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
 - [ ] No critical broken internal links
 
 ## Open questions / Decisions
+- [DECISION 2026-11-02] Canonical, sitemap, robots and RSS origins use the
+  environment-backed `SITE_URL`. Query strings are stripped from canonical URLs;
+  RSS item URLs never carry campaign parameters.
+- [DECISION 2026-11-02] Telegram is a per-site Wagtail setting. Only public
+  `https://t.me/<channel>` URLs are accepted. The CTA appears on the homepage,
+  article pages and footer only when configured; no channel URL is seeded or guessed.
+- [DECISION 2026-11-02] The required RSS baseline is implemented independently of
+  the optional email signup, so the email decision remains open.
 - [OPEN] Will email signup ship at launch? The plan makes RSS the required baseline
   and email the first enhancement after launch, unless consent and unsubscribe can
   be run properly from day one.
@@ -95,3 +103,6 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.
+- 2026-11-02  Added sitemap, robots.txt, canonical/feed discovery links, RSS and
+  the validated Telegram site setting/CTAs. Policy pages, JSON-LD and optional
+  email signup remain for later slices.

@@ -80,6 +80,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "wagtail.contrib.settings.context_processors.settings",
                 "home.context_processors.site_navigation",
+                "seo.context_processors.seo_defaults",
             ],
         },
     },
