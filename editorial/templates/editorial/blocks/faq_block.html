@@ -1,0 +1,8 @@
+{% load wagtailcore_tags %}
+<section class="my-4">
+    <h2 class="h4">{{ value.heading }}</h2>
+    {% for item in value.questions %}
+    <h3 class="h6 mt-3">{{ item.question }}</h3>
+    <div>{{ item.answer|richtext }}</div>
+    {% endfor %}
+</section>

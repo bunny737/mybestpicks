@@ -1,0 +1,9 @@
+{% load wagtailimages_tags %}
+<figure class="my-4">
+    {% image value.image width-800 alt=value.alt_text class="img-fluid rounded" loading="lazy" %}
+    {% if value.caption or value.credit %}
+    <figcaption class="small text-body-secondary mt-1">
+        {{ value.caption }}{% if value.caption and value.credit %} · {% endif %}{% if value.credit %}Image: {{ value.credit }}{% endif %}
+    </figcaption>
+    {% endif %}
+</figure>

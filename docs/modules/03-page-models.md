@@ -154,7 +154,9 @@ Each rule maps to a test (`editorial/tests/`, `home/tests/`).
   exists) are covered there.
 - [OPEN] `/sitemap.xml` is not wired to a URL yet (module 06), so rule 4 is tested
   through `get_sitemap_urls()`. Add an end-to-end sitemap test in module 06.
-- [OPEN] `search_fields` for the new pages (module 08).
+- [OPEN] `search_fields` for the new pages (module 08). Module 04 later replaced the
+  minimal body with `ArticleBody` and made `get_context()` resolve product cards.
+  `ArticlePage.get_context()` item 7 above is now built (see module 04).
 - Module 05 later added `ArticlePage.sources` (inline `ArticleSource`, migration
   `editorial.0002`) and the `public_sources` context value.
 - [OPEN] Should `StandardPage` pages show up in the main navigation? Module 02.

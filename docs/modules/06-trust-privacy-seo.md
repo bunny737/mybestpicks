@@ -46,6 +46,13 @@ canonical tag, JSON-LD and the RSS `<link>`, and a marked spot in the footer for
 RSS and Telegram links. Do not add either link until `/feed/` and the Telegram
 setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
 
+## Hooks left by module 04
+- The affiliate disclosure (`components/affiliate_disclosure.html`) has no link to the
+  Affiliate Disclosure page. Add one here once that page exists.
+- FAQ blocks render visible headings and text; add `FAQPage` JSON-LD only if it is
+  genuinely eligible. `ArticlePage.get_context()` exposes `article_products` and
+  `has_active_offers`, which JSON-LD can reuse without new queries.
+
 ## Business rules
 1. Every page has its own `<title>`, meta description, canonical URL (apex
    `https://mybestpicks.in/…`) and exactly one H1.

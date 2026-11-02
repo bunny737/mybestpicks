@@ -1,0 +1,4 @@
+<p class="small text-body-secondary border-start border-3 ps-3 my-3">
+    {{ value.text }}
+    {% if value.url %}<a href="{{ value.url }}" rel="noopener nofollow">{% if value.source_name %}{{ value.source_name }}{% else %}Source{% endif %}</a>{% elif value.source_name %}({{ value.source_name }}){% endif %}
+</p>

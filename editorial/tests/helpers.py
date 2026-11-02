@@ -60,3 +60,54 @@ def make_standard_page(title="About", slug="about"):
     return get_home().add_child(
         instance=StandardPage(title=title, slug=slug, body="<p>Hello.</p>")
     )
+
+
+# --- article body builders (module 04) -----------------------------------------
+
+
+def card_block(product, block_id=None, **fields):
+    """Raw StreamField data for a product card. Fields override the defaults."""
+    value = {
+        "product": product.pk,
+        "verdict": "<p>A solid pick.</p>",
+        "recommendation_label": "",
+        "best_for": "",
+        "pros": [],
+        "cons": [],
+        "tested_by_editor": False,
+        "editorial_evidence": "",
+        "evidence_media": None,
+    }
+    value.update(fields)
+    block = {"type": "product_card", "value": value}
+    if block_id:
+        block["id"] = block_id
+    return block
+
+
+def table_block(positions=(), spec_keys=(), heading=""):
+    return {
+        "type": "comparison_table",
+        "value": {
+            "heading": heading,
+            "card_positions": list(positions),
+            "spec_keys": list(spec_keys),
+        },
+    }
+
+
+class TempMediaMixin:
+    """Keep image files and renditions made by a test out of the real media folder."""
+
+    def setUp(self):
+        import shutil
+        import tempfile
+
+        from django.test import override_settings
+
+        super().setUp()
+        media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, media, ignore_errors=True)
+        override = override_settings(MEDIA_ROOT=media)
+        override.enable()
+        self.addCleanup(override.disable)

@@ -1,0 +1,10 @@
+{% if related %}
+<section class="my-4">
+    <h2 class="h4">{{ value.heading }}</h2>
+    <div class="row row-cols-1 row-cols-md-2 g-3">
+        {% for article in related %}
+        <div class="col">{% include "components/article_card.html" with article=article %}</div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

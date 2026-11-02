@@ -39,6 +39,13 @@ and test fixtures. The human process is in
   reports the *articles* that still reference it.
 - `ArticleSource` rows (accessed dates, types) feed the research audit.
 
+## Hooks from module 04
+- Product cards store `tested_by_editor`, `editorial_evidence` and `evidence_media`; the
+  block already blocks saving an unsupported claim, so the audit only needs to check
+  old data.
+- To find the articles that use a product, ask Wagtail's reference index
+  (`ReferenceIndex.get_references_to(product)`), as `ReferenceIndexTests` does.
+
 ## Business rules
 1. The audit never edits content by itself. It only reports.
 2. The thresholds come from settings, not constants spread through the code.

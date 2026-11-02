@@ -224,6 +224,20 @@ PRODUCT_TYPE_CHOICES = [
 ]
 
 
+def comparable_spec_choices():
+    """
+    ``(key, label)`` for every comparable spec across all product types, one entry
+    per key. Used as a *callable* choices source for the comparison-table block, so a
+    change to the schemas never changes a migration.
+    """
+    seen = {}
+    for schema in PRODUCT_SPEC_SCHEMAS.values():
+        for spec in sorted(schema.specs, key=lambda s: s.display_order):
+            if spec.comparable and spec.key not in seen:
+                seen[spec.key] = spec.display_label
+    return list(seen.items())
+
+
 def get_schema(product_type):
     return PRODUCT_SPEC_SCHEMAS.get(product_type)
 

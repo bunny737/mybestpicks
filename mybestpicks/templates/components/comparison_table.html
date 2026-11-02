@@ -1,0 +1,25 @@
+{# `table` comes from ComparisonTableBlock.get_context; None means nothing to compare. #}
+{% if table %}
+<section class="my-4" aria-label="{% if value.heading %}{{ value.heading }}{% else %}Comparison table{% endif %}">
+    {% if value.heading %}<h2 class="h4">{{ value.heading }}</h2>{% endif %}
+    <div class="table-scroll">
+        <table class="table table-bordered table-sm align-middle comparison-table">
+            <caption class="visually-hidden">{% if value.heading %}{{ value.heading }}{% else %}Comparison of the products in this guide{% endif %}</caption>
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Product</th>
+                    {% for column in table.columns %}<th scope="col">{{ column.label }}</th>{% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in table.rows %}
+                <tr>
+                    <th scope="row"><a href="#{{ row.entry.anchor }}">{{ row.entry.product.brand.name }} {{ row.entry.product.name }}</a></th>
+                    {% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}

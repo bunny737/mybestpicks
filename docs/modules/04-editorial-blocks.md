@@ -3,7 +3,7 @@
 > Keep this file in sync with the code AT ALL TIMES.
 > If the code and this file disagree, this file is wrong. Fix it in the same commit.
 
-**Status:** Not Started
+**Status:** Done (2026-11-02)
 **Priority:** P0
 **Ticket:** MBP-004
 **Plan reference:** docs/mybestpicks_plan_v4.md §4 (StreamField blocks, rendering contract, safeguards), §6 (link rendering)
@@ -15,75 +15,133 @@ The StreamField blocks used to write articles. Product cards are the **only**
 source of per-article verdicts. Comparison tables are built from those cards and
 never re-select products.
 
-## Blocks (as planned; update to as-built)
+## Blocks (as-built)
+Code: `editorial/blocks.py` (`ArticleBody` is the body's `StreamBlock`),
+`editorial/rendering.py`, templates in `editorial/templates/editorial/blocks/` and
+`mybestpicks/templates/components/`. Migration `editorial.0003`.
+
 ```
-RichTextBlock, HeadingBlock
-ImageBlock            image, caption, license attribution
-KeyTakeawaysBlock, BuyingCriteriaBlock
-ProductCardBlock      product (SnippetChooserBlock → Product)
-                      recommendation_label, verdict, pros[], cons[]
-                      best_for, editorial_evidence, evidence_media (optional image)
-                      tested_by_editor (bool)
-ComparisonTableBlock  card_ids (optional subset of this article's product cards, in order)
-                      spec_keys (optional canonical spec keys to show)
-                      NO product chooser
-FAQBlock, SourceNoteBlock, RelatedArticlesBlock
+paragraph          rich text (h2-h4, bold, italic, lists, links)
+heading            text + level (H2/H3); H1 is always the page title
+image              image, alt_text (required), caption, provenance (required), credit
+key_takeaways      heading + 1-8 points
+buying_criteria    heading + criteria (name, why)
+product_card       product (ProductChooserBlock → catalog.Product)
+                   recommendation_label, best_for, verdict (rich text), pros[], cons[]
+                   tested_by_editor, editorial_evidence (notes), evidence_media (own photo)
+comparison_table   heading, card_positions[] (optional), spec_keys[] (optional)
+                   NO product chooser
+faq                heading + questions (question, answer)
+source_note        text, source_name, url (http/https only)
+related_articles   heading + 1-6 article pages (only live ones render)
 ```
+`ProductChooserBlock` is a `SnippetChooserBlock` that loads the brand with the product
+in the same bulk query that loads every product in the article.
 
-## What module 05 provides for this module
-- `Product.spec_rows` / `catalog.specs.spec_rows()`: ordered, labelled, unit-aware
-  rows, with `value=None` for unrecorded specs (show a dash). Use `comparable` to pick
-  comparison columns.
-- `MerchantOffer.objects.renderable().select_related("merchant", "product")` for the
-  batch query, then keep only offers whose `is_renderable` is true (it re-checks the
-  link host against the merchant's current allowlist and costs no query).
-- `Merchant.cta_label` for the button text ("View at Flipkart", or the merchant's own
-  text). Offers render as `rel="sponsored nofollow noopener"` in the same tab.
-- `Product.image_provenance` and `image_credit`, for credit lines.
+## Rendering contract (CLAUDE.md invariant 4) — as-built
+`ArticlePage.get_context()` calls `resolve_article_products(self.body)` **once, before
+any block renders**:
+1. Walks `body` and collects every `product_card` in order (block id, 1-based
+   position as an editor counts them).
+2. The products come from one bulk query (`ProductChooserBlock.bulk_to_python`, with
+   brands joined).
+3. One query loads the **renderable** offers with their merchants; each offer is
+   handed its product so `is_renderable` costs no query.
+4. One query loads every product and evidence image, with their renditions
+   prefetched (`width-400` for products, `width-640` for evidence; the `{% image %}`
+   tags use the same specs).
+5. Specs are normalised once with `catalog.specs.spec_rows()`.
+6. Each card value gets `card.resolved = ProductEntry(...)`, which the card template
+   reads. The context also gets `article_products` (entries in order),
+   `has_active_offers`, `first_cta_block_id` and `quick_picks`.
 
-## Rendering contract (CLAUDE.md invariant 4)
-`ArticlePage.get_context()`:
-1. Walks `body` and collects every `ProductCardBlock`, in order, with its block id.
-2. Batch-loads the referenced products with `select_related("brand")`, and their
-   renderable offers with merchants, in a bounded number of queries.
-3. Validates and normalises each product's specs once against `catalog/specs.py`.
-4. Exposes `article_products` (ordered, keyed by block id), plus
-   `has_active_offers` and `first_cta_block_id`.
+Cards, quick picks and comparison tables read only from these values, so a table may
+appear above the cards it reads. The number of queries does not depend on the number
+of cards (measured: identical for 2 and for 9 cards, each with an image, an offer and
+an evidence photo). An article with no cards runs no catalog query at all.
 
-Quick picks, comparison tables and card templates read only from
-`article_products`. A table may appear above the cards because the context is
-precomputed.
+## Article page order (as-built)
+breadcrumb → title, author, dates, short answer → hero image → methodology
+(collapsible) → **affiliate disclosure (only if `has_active_offers`)** → quick picks →
+body → public sources, tags, last reviewed → related guides. The disclosure sits
+before the body because every CTA is inside a body product card, so it is always
+before the first CTA whatever order the editor builds.
 
 ## Business rules
-1. `ProductCardBlock.clean()` raises `ValidationError` when `tested_by_editor=True`
-   and both `editorial_evidence` and `evidence_media` are empty. Test the valid and
-   invalid cases.
-2. When a card is not tested, the template never uses hands-on wording ("we
-   tested", "in our testing").
-3. `ComparisonTableBlock` shows all of the article's cards by default, or the
-   chosen `card_ids` subset in order. An id that does not match a card is a
-   validation error and must not break rendering.
-4. Only `comparable` spec keys can be columns. A missing value shows as "—" and is
-   never guessed.
-5. A merchant CTA renders only for a renderable offer, as an
-   `<a rel="sponsored nofollow noopener">` in the same tab, labelled
-   "View at <Merchant>" or "Check price at <Merchant>". It never shows a price.
-6. `affiliate_disclosure.html` renders once, before the first CTA, and only when
-   `has_active_offers` is true.
-7. Rendering an article with N product cards uses a constant number of queries
-   (test with `assertNumQueries`).
-8. Wagtail's reference index finds the articles that use a given `Product`. Verify
-   this for the chosen chooser block, and test what happens when a product is
-   swapped.
+Each rule maps to a test in `editorial/tests/` (file in brackets).
+1. `ProductCardBlock.clean()` raises a `ValidationError` when `tested_by_editor` is
+   ticked and there are neither evidence notes (whitespace does not count) nor an
+   evidence photo. (`test_product_cards`)
+2. An untested card never uses hands-on wording: its HTML does not contain "tested" at
+   all, and says "Based on desk research; we have not used this product." A tested
+   card shows "Hands-on tested by our editor" plus the evidence. (`test_product_cards`)
+3. `comparison_table` shows every card by default, or the chosen `card_positions` in
+   the given order. Saving is blocked if the article has fewer than two cards, a
+   position does not exist or a position is repeated. At render time a position with
+   no card (removed since) is skipped, never an error. (`test_comparison_table`)
+4. Columns are comparable specs only. A column no included product records is left
+   out (even if the editor listed it); a spec one product lacks shows an em dash and is
+   never guessed. With fewer than two products or no columns, nothing renders.
+   (`test_comparison_table`)
+5. A CTA renders only for a renderable offer, as
+   `<a rel="sponsored nofollow noopener">` in the same tab, labelled with the
+   merchant's button text ("View at Flipkart", "Check price at Amazon"). It never
+   shows a price. Inactive offers, disabled merchants, discontinued products and
+   hosts no longer in the allowlist produce no button. (`test_product_cards`)
+6. The disclosure renders once, before the first CTA, and only when an offer will
+   render; offers that will not render never trigger it. It makes no programme claims
+   (no "Amazon", "Associate", merchant names). (`test_disclosure`)
+7. Rendering N cards uses a constant number of queries (`test_rendering_contract`).
+8. Wagtail's reference index finds the articles that use a product, and swapping a
+   product moves the reference. (`test_body_blocks.ReferenceIndexTests`)
+9. An `image` block needs alt text and provenance, and a credit unless the image is an
+   owned original (invariant 8). (`test_body_blocks`)
+10. Block text is escaped (verdicts, pros, captions). `source_note` links are
+    `rel="noopener nofollow"` and only http/https. (`test_product_cards`, `test_body_blocks`)
 
 ## Edge cases handled
-- A card's product is deleted: blocked by PROTECT, or the card renders a safe
-  placeholder. Decide which and test it.
-- An article has no cards: there are no tables, no disclosure and no CTA queries.
+- **A product deleted after a card used it.** StreamField references are not
+  database foreign keys, so deletion cannot be blocked. Decision: the card is left out
+  for readers and for tables (no broken page); Wagtail's usage count warns editors
+  before they delete. (`test_product_cards`, `test_comparison_table`,
+  `test_rendering_contract`)
+- **The same product in two cards** gets two entries. (`test_rendering_contract`)
+- **A discontinued or unavailable product** keeps its card with a plain note; a
+  discontinued product's offers do not render. (`test_product_cards`)
+- **An article with no cards:** no tables, no disclosure, no quick picks, no catalog
+  queries. (`test_product_cards`, `test_rendering_contract`)
 
 ## Open questions / Decisions
-- [OPEN] Is "quick picks" its own block, or a template section built from the
-  cards' `recommendation_label`?
+- [DECISION 2026-11-02] **Quick picks is a template section, not a block.** It lists
+  the cards that have a `recommendation_label` (with their `best_for`), links to each
+  card, and is omitted when no card has a label. One less block for editors to place,
+  and it can never disagree with the cards.
+- [DECISION 2026-11-02] The comparison table chooses cards by **position** (1, 2, 3 in
+  the order they appear), not by block id: editors never see block ids. The article's
+  `clean()` rejects positions that do not exist. Trade-off: reordering cards changes
+  what a position means; the help text says so.
+- [DECISION 2026-11-02] `comparison_table` column choices come from a *callable*
+  (`catalog.specs.comparable_spec_choices`), so editing `specs.py` never needs a
+  migration. The generated migration references the function, not a list of specs.
+- [DECISION 2026-11-02] Dropped unrecorded columns (rule 4) rather than showing a
+  column of dashes.
+- [DECISION 2026-11-02] The disclosure has no link to the Affiliate Disclosure page
+  yet: that page's URL is not guaranteed to exist. Module 06 can add the link.
+- [DECISION 2026-11-02] The disclosure text is generic ("Some links on this page are
+  affiliate links...") and names no network, because it must stay true for Flipkart via
+  Cuelinks and must never imply Amazon Associate status.
+- [DECISION 2026-11-02] FAQ answers render as visible headings and text (not
+  collapsed), so they are in the server HTML. FAQ structured data is module 06.
+- [OPEN] Body `image` blocks create their renditions one query per image (only product
+  and evidence images are prefetched). Fine for a few images per article; revisit with
+  real performance data.
+- [OPEN] Product cards have no per-card "update date": the card shows the product's
+  `last_verified_at` ("Facts checked ...").
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.
+- 2026-11-02  Built: `ArticleBody` with ten blocks, `ProductChooserBlock`, the
+  resolver in `editorial/rendering.py`, product card, comparison table, disclosure and
+  block templates, quick picks, migration `editorial.0003`, 78 new tests (241 in
+  total). Mutation-checked the evidence, disclosure, renderable-offer and query-count
+  rules. Visually checked an article with cards and a table at 320px.

@@ -22,7 +22,8 @@ from wagtail.query import PageQuerySet
 
 from catalog.provenance import ImageProvenance, validate_image_provenance
 
-from .blocks import article_body_blocks
+from .blocks import ArticleBody
+from .rendering import resolve_article_products
 
 # A hub in "auto" mode is discoverable once it has this many live articles.
 DISCOVERY_AUTO_MIN_ARTICLES = 3
@@ -156,7 +157,7 @@ class ArticlePage(Page):
 
     The published date is Wagtail's ``first_published_at``; only the review date is
     stored here. Whether the article shows an affiliate disclosure is derived from
-    its rendered offers (module 04), never from a hand-set flag.
+    its rendered offers (``has_active_offers``), never from a hand-set flag.
     """
 
     parent_page_types = ["editorial.CategoryPage"]
@@ -184,7 +185,7 @@ class ArticlePage(Page):
     featured_image_credit = models.CharField(
         "Featured image credit or licence evidence", max_length=255, blank=True
     )
-    body = StreamField(article_body_blocks(), blank=True)
+    body = StreamField(ArticleBody(), blank=True)
     methodology = RichTextField(
         blank=True,
         help_text="Selection criteria, evidence and research date.",
@@ -235,8 +236,17 @@ class ArticlePage(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context["public_sources"] = [s for s in self.sources.all() if s.is_public]
-        # Other live guides in the same hub. Module 04 extends this context with
-        # the precomputed ``article_products`` (rendering contract).
+        # The rendering contract (invariant 4): resolve every product card, its
+        # offers, images and specs ONCE, before any body block renders. Cards,
+        # quick picks and comparison tables read only from these values.
+        products = resolve_article_products(self.body)
+        context["article_products"] = products.entries
+        context["has_active_offers"] = products.has_active_offers
+        context["first_cta_block_id"] = products.first_cta_block_id
+        context["quick_picks"] = [
+            entry for entry in products.entries if entry.card["recommendation_label"]
+        ]
+        # Other live guides in the same hub.
         context["related_articles"] = (
             ArticlePage.objects.sibling_of(self, inclusive=False)
             .live()

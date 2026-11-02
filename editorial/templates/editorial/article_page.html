@@ -3,7 +3,7 @@
 
 {% block body_class %}template-article{% endblock %}
 
-{# Order follows plan section 5. Modules 04 adds the disclosure, quick picks and comparison table. #}
+{# Order follows plan section 5: methodology, disclosure, quick picks, then the body (cards, tables). #}
 {% block content %}
 <article class="container pt-4">
     {% breadcrumbs %}
@@ -38,6 +38,24 @@
         <summary>How we researched this</summary>
         <div class="mt-3">{{ page.methodology|richtext }}</div>
     </details>
+    {% endif %}
+
+    {# The disclosure comes before everything that can contain a CTA (the product cards in the body). #}
+    {% if has_active_offers %}{% include "components/affiliate_disclosure.html" %}{% endif %}
+
+    {% if quick_picks %}
+    <section class="prose mb-4" aria-labelledby="quick-picks-heading">
+        <h2 id="quick-picks-heading" class="h4">Quick picks</h2>
+        <ul class="list-unstyled mb-0">
+            {% for entry in quick_picks %}
+            <li class="mb-2">
+                <span class="badge text-bg-primary">{{ entry.card.recommendation_label }}</span>
+                <a href="#{{ entry.anchor }}">{{ entry.product.brand.name }} {{ entry.product.name }}</a>
+                {% if entry.card.best_for %}<span class="text-body-secondary"> &mdash; {{ entry.card.best_for }}</span>{% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
     {% endif %}
 
     <div class="prose article-body">
