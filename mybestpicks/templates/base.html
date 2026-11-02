@@ -9,6 +9,8 @@
     {% if robots_meta %}<meta name="robots" content="{{ robots_meta }}" />{% endif %}
     <link rel="canonical" href="{{ canonical_url }}" />
     <link rel="alternate" type="application/rss+xml" title="MyBestPicks guides" href="{{ rss_feed_url }}" />
+    <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
 
     {# Force all links in the live preview panel to be opened in a new tab #}
     {% if request.in_preview_panel %}<base target="_blank">{% endif %}
@@ -36,8 +38,7 @@
         <nav class="navbar navbar-expand-lg" aria-label="Primary">
             <div class="container">
                 <a class="navbar-brand fw-bold" href="/">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
-                    <span>MyBestPicks</span>
+                    <img src="{% static 'img/logo.png' %}" alt="MyBestPicks" height="32" width="141">
                     <span class="brand-badge ms-1">India</span>
                 </a>
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
