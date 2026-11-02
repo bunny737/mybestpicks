@@ -57,6 +57,16 @@ def make_articles(category, author, count, live=True, prefix="guide"):
 
 
 def make_standard_page(title="About", slug="about"):
+    # Six slugs (about, contact, editorial-policy, affiliate-disclosure,
+    # privacy-policy, terms) already exist as unpublished drafts, seeded by
+    # editorial/migrations/0004_seed_policy_pages.py. Reuse and publish one
+    # rather than erroring on a duplicate slug.
+    existing = StandardPage.objects.filter(slug=slug).first()
+    if existing is not None:
+        existing.title = title
+        existing.live = True
+        existing.save()
+        return existing
     return get_home().add_child(
         instance=StandardPage(title=title, slug=slug, body="<p>Hello.</p>")
     )

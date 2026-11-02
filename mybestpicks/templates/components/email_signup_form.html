@@ -1,0 +1,34 @@
+{% load wagtailcore_tags %}
+<div class="row align-items-center gy-2">
+    <div class="col-lg-5 col-md-12">
+        <p class="fw-semibold text-white mb-1">Get our best guides by email</p>
+        <p class="small text-secondary mb-0">
+            Occasional updates only. Double opt-in, unsubscribe anytime.
+            {% if privacy_policy_page %}Read our
+            <a href="{% pageurl privacy_policy_page %}">privacy notice</a>.{% endif %}
+        </p>
+    </div>
+    <div class="col-lg-7 col-md-12">
+        <form class="row g-2 align-items-start" action="{% url 'subscribe' %}" method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <div class="col-sm-5">
+                <label class="visually-hidden" for="email-signup-address">Email address</label>
+                <input class="form-control form-control-sm" id="email-signup-address" type="email"
+                       name="email" placeholder="you@example.com" required maxlength="254">
+            </div>
+            <div class="col-sm-5">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="email-signup-consent"
+                           name="consent" required>
+                    <label class="form-check-label small text-secondary" for="email-signup-consent">
+                        I agree to receive occasional emails and have read the privacy notice.
+                    </label>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-sm btn-primary w-100" type="submit">Subscribe</button>
+            </div>
+        </form>
+    </div>
+</div>

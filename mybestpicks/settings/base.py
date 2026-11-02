@@ -9,6 +9,7 @@ so production can never silently fall back to a development key.
 from pathlib import Path
 
 import environ
+from django.contrib.messages import constants as messages_constants
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR = PROJECT_DIR.parent
@@ -185,6 +186,26 @@ BLOCK_SEARCH_INDEXING = env.bool("BLOCK_SEARCH_INDEXING", default=False)
 # Editorial QA audit (module 10): a product's last fact-check, or an offer's last
 # manual link check, counts as stale after this many days.
 EDITORIAL_AUDIT_STALE_DAYS = env.int("EDITORIAL_AUDIT_STALE_DAYS", default=30)
+
+# Bootstrap has no "alert-error" class; map Django's ERROR level to "danger" so
+# django.contrib.messages renders with the right alert colour out of the box.
+MESSAGE_TAGS = {messages_constants.ERROR: "danger"}
+
+# Email (module 06 opt-in signup: confirmation and unsubscribe links). The
+# console backend in dev.py prints these instead of sending them.
+EMAIL_BACKEND = env(
+    "EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="no-reply@mybestpicks.in")
+
+# Recorded against each subscriber as the consent text they agreed to. Bump this
+# whenever the signup form's consent copy changes materially.
+EMAIL_CONSENT_TEXT_VERSION = env("EMAIL_CONSENT_TEXT_VERSION", default="2026-11-02")
 
 # Allowed file extensions for documents in the document library.
 # See https://docs.wagtail.org/en/stable/advanced_topics/deploying.html#user-uploaded-files

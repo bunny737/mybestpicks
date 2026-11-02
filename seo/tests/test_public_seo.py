@@ -42,6 +42,7 @@ class PublicSeoTests(TestCase):
         self.assertContains(response, "Allow: /")
         self.assertContains(response, "Disallow: /admin/")
         self.assertContains(response, "Disallow: /search/")
+        self.assertContains(response, "Disallow: /subscribe/")
         self.assertContains(response, "Sitemap: https://mybestpicks.in/sitemap.xml")
 
     def test_pages_have_one_query_free_canonical_and_feed_discovery_link(self):

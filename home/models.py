@@ -1,4 +1,5 @@
 import re
+import secrets
 
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -54,6 +55,13 @@ def validate_ads_txt_lines(value):
 class SiteSettings(BaseSiteSetting):
     """Public, per-site settings. Secrets must never be stored here."""
 
+    contact_email = models.EmailField(
+        blank=True,
+        help_text=(
+            "Shown on the Contact page and referenced in the privacy notice. "
+            "Leave blank to hide: never invent an address."
+        ),
+    )
     telegram_channel_url = models.URLField(
         blank=True,
         validators=[telegram_url_validator],
@@ -98,6 +106,7 @@ class SiteSettings(BaseSiteSetting):
     )
 
     panels = [
+        FieldPanel("contact_email"),
         FieldPanel("telegram_channel_url"),
         FieldPanel("telegram_channel_label"),
         FieldPanel("adsense_publisher_id"),
@@ -183,3 +192,30 @@ class HomeFeaturedGuide(Orderable):
     panels = [
         FieldPanel("article"),
     ]
+
+
+class EmailSubscriber(models.Model):
+    """
+    A double opt-in email subscriber (module 06). Collects only what is needed to
+    run the list and honour consent (CLAUDE.md invariant 9): no name, and never
+    imported from the Telegram channel. ``unsubscribe_token`` doubles as the
+    confirmation token: the same link space, since both are equally low-stakes to
+    guess-proof with one opaque token rather than two.
+    """
+
+    email = models.EmailField(unique=True)
+    consented_at = models.DateTimeField(auto_now_add=True)
+    consent_text_version = models.CharField(max_length=20)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    unsubscribe_token = models.CharField(max_length=64, unique=True, editable=False)
+
+    class Meta:
+        ordering = ["-consented_at"]
+
+    def __str__(self):
+        return self.email
+
+    def save(self, *args, **kwargs):
+        if not self.unsubscribe_token:
+            self.unsubscribe_token = secrets.token_urlsafe(32)
+        super().save(*args, **kwargs)

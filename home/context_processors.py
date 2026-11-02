@@ -32,6 +32,22 @@ def _footer_pages(request):
     )
 
 
+def _privacy_policy_page(request):
+    return StandardPage.objects.live().public().filter(slug="privacy-policy").first()
+
+
+def _contact_email(request):
+    from home.models import SiteSettings
+
+    site = Site.find_for_request(request)
+    if not site:
+        return ""
+    try:
+        return SiteSettings.for_site(site).contact_email
+    except ObjectDoesNotExist:
+        return ""
+
+
 def has_ad_consent(request):
     """
     Consent gate for advertising cookies & third-party AdSense scripts.
@@ -122,6 +138,8 @@ def site_navigation(request):
     return {
         "nav_categories": SimpleLazyObject(lambda: _nav_categories(request)),
         "footer_pages": SimpleLazyObject(lambda: _footer_pages(request)),
+        "privacy_policy_page": SimpleLazyObject(lambda: _privacy_policy_page(request)),
+        "contact_email": SimpleLazyObject(lambda: _contact_email(request)),
         "adsense_publisher_id": SimpleLazyObject(
             lambda: adsense_config["publisher_id"]
         ),

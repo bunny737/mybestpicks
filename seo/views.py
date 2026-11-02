@@ -13,6 +13,7 @@ def robots_txt(request):
         "Disallow: /admin/",
         "Disallow: /django-admin/",
         "Disallow: /search/",
+        "Disallow: /subscribe/",
         f"Sitemap: {sitemap_url}",
     ]
     return HttpResponse("\n".join(lines) + "\n", content_type="text/plain")
