@@ -3,11 +3,12 @@
 > Keep this file in sync with the code AT ALL TIMES.
 > If the code and this file disagree, this file is wrong. Fix it in the same commit.
 
-**Status:** Not Started
+**Status:** Not Started. **HELD: do not start or run anything until the owner says
+development is finished** (decision 2026-11-02)
 **Priority:** P0
 **Ticket:** MBP-007
 **Plan reference:** docs/mybestpicks_plan_v4.md §9, §12 (hosting and security risks), §13
-**Depends on:** 01, 02, 03
+**Depends on:** 01-06, 08, 10 (all development modules; see the hold above)
 **Blocks:** 09
 
 ## Purpose
@@ -45,6 +46,12 @@ later:      umami (module 09) as its own service with its own DB/user
    inspected **before** DNS is cut over.
 
 ## Open questions / Decisions
+- [DECISION 2026-11-02] The owner has put deployment on hold until development is
+  finished, replacing the plan's week-2 minimal deploy. Nothing in this module (no
+  `compose.prod.yaml`, Nginx config, backup scripts or server) is built until then.
+  The first deploy will already have the sitemap, RSS, legal pages and search, so the
+  old "public or hidden early deploy" question is moot. Decide staging versus
+  straight-to-production when this module starts.
 - [OPEN] VPS provider, region and size.
 - [OPEN] Off-box backup destination and retention.
 - [OPEN] Error monitoring tool (for example Sentry's free tier, or logs plus an
@@ -53,3 +60,4 @@ later:      umami (module 09) as its own service with its own DB/user
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.
+- 2026-11-02  Put on hold by the owner: no deployment until development is finished.

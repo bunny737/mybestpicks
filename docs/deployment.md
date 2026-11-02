@@ -3,8 +3,10 @@
 Plan reference: [mybestpicks_plan_v4.md §9](mybestpicks_plan_v4.md). Module spec:
 [modules/07-release-pipeline.md](modules/07-release-pipeline.md).
 
-Status: **not deployed**. The provider, backup destination and monitoring tool are
-still open (see the module 07 spec). Treat the first run as a test of this runbook,
+Status: **not deployed, and on hold: no deployment until development is finished**
+(owner decision 2026-11-02). Do not provision a server, change DNS or deploy from
+this runbook until the owner says so. The provider, backup destination and
+monitoring tool are still open (see the module 07 spec). Treat the first run as a test of this runbook,
 and correct this file afterwards.
 
 ## 1. Architecture

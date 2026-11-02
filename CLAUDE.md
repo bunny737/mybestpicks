@@ -119,11 +119,18 @@ Module numbers match the plan's MBP tickets. The build order is the dependency
 order, not the numeric order. The status board is
 [docs/modules/README.md](docs/modules/README.md).
 
-01 scaffold → 03 page-models → 02 base-layout → 07 release-pipeline (minimal
-production deploy, week 2) → 05 product-catalog → 04 editorial-blocks
-→ 06 trust-privacy-seo → 08 search → 09 metrics → 10 editorial-qa
+01 scaffold → 03 page-models → 02 base-layout → 05 product-catalog
+→ 04 editorial-blocks → 06 trust-privacy-seo → 08 search → 10 editorial-qa
+→ 07 release-pipeline → 09 metrics
 → (P2, only after launch: 14 telegram-posting, 13 amazon-eligibility,
 12 adsense, 11 merchant-api)
+
+**NO DEPLOYMENT until development is finished** (owner decision 2026-11-02). This
+overrides the plan's "minimal production deploy in week 2". Do not provision a
+server, change DNS, push images or deploy anywhere, and do not start module 07,
+until the owner says development is complete. Local development and CI are fine.
+Module 07 stays last among the P0/P1 modules; module 09 follows it because Search
+Console and Umami need a live site.
 
 ## Per-task workflow
 1. Read this file and the relevant `docs/modules/<nn>-*.md` spec.
@@ -153,6 +160,7 @@ production deploy, week 2) → 05 product-catalog → 04 editorial-blocks
   All of these are out of scope.
 - A new `product_type` is needed (it requires `catalog/specs.py` and tests).
   Confirm the spec keys first.
-- Any change to production DNS, the existing `mybestpicks.in` content or the
-  Telegram channel. Inspect first and never overwrite.
+- Any deploy, or any change to production DNS, the existing `mybestpicks.in`
+  content or the Telegram channel (see the no-deploy rule above). Inspect first and
+  never overwrite.
 - Applying to an affiliate program or AdSense, or showing affiliate status on the site.
