@@ -1,0 +1,6 @@
+# Direct runtime dependencies, pinned exactly. Transitive versions are pinned in
+# constraints.txt. See README.md ("Dependencies") for how to update both by hand.
+Django==6.1.2
+wagtail==8.0.1
+psycopg[binary]==3.3.6
+django-environ==0.14.0

@@ -1,0 +1,13 @@
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+extend-exclude = ["static", "media"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+
+[tool.ruff.lint.per-file-ignores]
+# Generated migrations are not hand-edited or linted.
+"**/migrations/*.py" = ["E501", "I", "UP", "DJ"]
+# Settings use star imports from base by design.
+"mybestpicks/settings/*.py" = ["F403", "F405"]
