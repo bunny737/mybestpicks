@@ -6,14 +6,26 @@
 {% block content %}
 <div class="container pt-4">
     {% breadcrumbs %}
-    <h1>{{ page.title }}</h1>
-    {% if page.intro %}<div class="prose">{{ page.intro|richtext }}</div>{% endif %}
-    <ul class="list-unstyled mt-4">
+    <header class="mb-5 pb-3 border-bottom">
+        <span class="card-kind-badge mb-2">Editorial Team</span>
+        <h1 class="display-5 fw-bold text-dark mb-3">{{ page.title }}</h1>
+        {% if page.intro %}
+        <div class="prose lead text-secondary">{{ page.intro|richtext }}</div>
+        {% endif %}
+    </header>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4 mt-2">
         {% for author in authors %}
-        <li class="mb-2"><a href="{% pageurl author %}">{{ author.title }}</a>
-            {% if author.expertise %}<span class="text-body-secondary"> — {{ author.expertise }}</span>{% endif %}
-        </li>
+        <div class="col">
+            <div class="card h-100 p-4 border rounded-4 shadow-sm">
+                <h2 class="h5 fw-bold mb-1"><a href="{% pageurl author %}" class="text-dark text-decoration-none">{{ author.title }}</a></h2>
+                {% if author.expertise %}
+                <p class="small text-primary fw-semibold mb-2">{{ author.expertise }}</p>
+                {% endif %}
+                <p class="small text-body-secondary mb-0">View reviews &amp; guides by {{ author.title }} &rarr;</p>
+            </div>
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 </div>
 {% endblock %}

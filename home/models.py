@@ -1,3 +1,6 @@
+import re
+
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models import F
@@ -14,6 +17,38 @@ telegram_url_validator = RegexValidator(
     message="Enter a Telegram channel URL such as https://t.me/mybestpicks.",
 )
 
+adsense_publisher_id_validator = RegexValidator(
+    regex=r"^(?:ca-)?pub-\d{16}$",
+    message=(
+        "Enter a valid Google AdSense Publisher ID such as "
+        "pub-1234567890123456 or ca-pub-1234567890123456."
+    ),
+)
+
+adsense_slot_id_validator = RegexValidator(
+    regex=r"^\d{10}$",
+    message="Enter a 10-digit AdSense ad unit ID (e.g. 1234567890).",
+)
+
+
+def validate_ads_txt_lines(value):
+    """Ensure custom ads.txt lines follow IAB specification or comment syntax."""
+    if not value:
+        return
+    pattern = re.compile(
+        r"^[A-Za-z0-9.-]+,\s*[A-Za-z0-9-]+,\s*(?:DIRECT|RESELLER)(?:,\s*[A-Fa-f0-9]+)?$",
+        re.IGNORECASE,
+    )
+    for lineno, raw_line in enumerate(value.splitlines(), start=1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if not pattern.match(line):
+            raise ValidationError(
+                f"Line {lineno} is invalid ('{line}'). Expected format: "
+                "<domain>, <publisher_id>, <DIRECT|RESELLER>[, <cert_id>]"
+            )
+
 
 @register_setting
 class SiteSettings(BaseSiteSetting):
@@ -27,10 +62,50 @@ class SiteSettings(BaseSiteSetting):
     telegram_channel_label = models.CharField(
         max_length=80, blank=True, default="Join on Telegram"
     )
+    adsense_publisher_id = models.CharField(
+        max_length=64,
+        blank=True,
+        validators=[adsense_publisher_id_validator],
+        help_text=(
+            "e.g. pub-1234567890123456 or ca-pub-1234567890123456. "
+            "Leave blank to disable."
+        ),
+    )
+    adsense_enabled = models.BooleanField(
+        default=False,
+        help_text="Master switch to activate Google AdSense on eligible content pages.",
+    )
+    adsense_auto_ads = models.BooleanField(
+        default=False,
+        help_text="Enable Google AdSense Auto Ads (automatic ad placement).",
+    )
+    adsense_in_article_slot_id = models.CharField(
+        max_length=32,
+        blank=True,
+        validators=[adsense_slot_id_validator],
+        help_text="10-digit AdSense ad unit ID for in-article manual placements.",
+    )
+    adsense_feed_slot_id = models.CharField(
+        max_length=32,
+        blank=True,
+        validators=[adsense_slot_id_validator],
+        help_text="10-digit AdSense ad unit ID for category feed manual placements.",
+    )
+    ads_txt_custom = models.TextField(
+        blank=True,
+        validators=[validate_ads_txt_lines],
+        help_text="Custom lines to append to /ads.txt.",
+    )
 
     panels = [
         FieldPanel("telegram_channel_url"),
         FieldPanel("telegram_channel_label"),
+        FieldPanel("adsense_publisher_id"),
+        FieldPanel("adsense_enabled"),
+        FieldPanel("adsense_auto_ads"),
+        FieldPanel("adsense_in_article_slot_id"),
+        FieldPanel("adsense_feed_slot_id"),
+        FieldPanel("ads_txt_custom"),
     ]
 
 
@@ -100,7 +175,11 @@ class HomeFeaturedGuide(Orderable):
         "home.HomePage", related_name="featured_guides", on_delete=models.CASCADE
     )
     article = models.ForeignKey(
-        "editorial.ArticlePage", on_delete=models.CASCADE, related_name="+"
+        "editorial.ArticlePage",
+        on_delete=models.CASCADE,
+        related_name="+",
     )
 
-    panels = [FieldPanel("article")]
+    panels = [
+        FieldPanel("article"),
+    ]

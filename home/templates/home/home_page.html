@@ -4,27 +4,61 @@
 {% block body_class %}template-homepage{% endblock %}
 
 {% block content %}
-<section class="hero py-5">
+<section class="hero">
     <div class="container">
-        <h1 class="display-5 fw-bold">{{ page.hero_title }}</h1>
-        {% if page.hero_text %}<p class="lead mb-0 prose">{{ page.hero_text }}</p>{% endif %}
+        <div class="row align-items-center">
+            <div class="col-lg-10">
+                <span class="hero-eyebrow">Editorial Buying Guides &middot; India</span>
+                <h1 class="hero-title">{{ page.hero_title }}</h1>
+                {% if page.hero_text %}
+                <p class="lead prose text-body-secondary mt-2 mb-0">{{ page.hero_text }}</p>
+                {% endif %}
+
+                <div class="hero-trust-badges">
+                    <span class="hero-trust-badge-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Practical buying guides
+                    </span>
+                    <span class="hero-trust-badge-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Clear spec comparisons
+                    </span>
+                    <span class="hero-trust-badge-item">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Curated for shoppers in India
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
-<div class="container">
+<div class="container pt-3">
     {% include "components/telegram_cta.html" %}
+
     {% if categories %}
     <section class="my-5" aria-labelledby="categories-heading">
-        <h2 id="categories-heading" class="h3 mb-3">Browse by category</h2>
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Browse Topics</p>
+                <h2 id="categories-heading" class="h3 fw-bold mb-0">Browse by category</h2>
+            </div>
+        </div>
         <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
             {% for category in categories %}
             <div class="col">
-                <div class="card h-100 position-relative">
-                    <div class="card-body">
-                        <h3 class="card-title h5"><a href="{% pageurl category %}">{{ category.title }}</a></h3>
-                        {% if category.introduction %}
-                        <div class="card-text small">{{ category.introduction|richtext|truncatewords_html:25 }}</div>
-                        {% endif %}
+                <div class="card category-card h-100 position-relative p-2">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <h3 class="card-title h5"><a href="{% pageurl category %}">{{ category.title }}</a></h3>
+                            {% if category.introduction %}
+                            <div class="card-text text-body-secondary small">{{ category.introduction|richtext|truncatewords_html:22 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="pt-3 text-primary fw-semibold small d-flex align-items-center gap-1">
+                            <span>Explore guides</span>
+                            <span aria-hidden="true">&rarr;</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -35,8 +69,13 @@
 
     {% if featured_articles %}
     <section class="my-5" aria-labelledby="featured-heading">
-        <h2 id="featured-heading" class="h3 mb-3">Featured guides</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Featured</p>
+                <h2 id="featured-heading" class="h3 fw-bold mb-0">Featured guides</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for article in featured_articles %}
             <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
@@ -46,8 +85,13 @@
 
     {% if latest_comparisons %}
     <section class="my-5" aria-labelledby="comparisons-heading">
-        <h2 id="comparisons-heading" class="h3 mb-3">Latest comparisons</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Comparisons</p>
+                <h2 id="comparisons-heading" class="h3 fw-bold mb-0">Latest comparisons</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for article in latest_comparisons %}
             <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
@@ -57,8 +101,13 @@
 
     {% if recently_updated %}
     <section class="my-5" aria-labelledby="updated-heading">
-        <h2 id="updated-heading" class="h3 mb-3">Recently updated</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Updates</p>
+                <h2 id="updated-heading" class="h3 fw-bold mb-0">Recently updated</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for article in recently_updated %}
             <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
@@ -67,8 +116,8 @@
     {% endif %}
 
     {% if page.trust_panel %}
-    <section class="my-5 p-4 bg-body-tertiary rounded" aria-labelledby="trust-heading">
-        <h2 id="trust-heading" class="h3">How we choose</h2>
+    <section class="my-5 p-4 p-md-5 bg-light rounded-4 border" aria-labelledby="trust-heading">
+        <h2 id="trust-heading" class="h3 fw-bold mb-3">How we choose</h2>
         <div class="prose">{{ page.trust_panel|richtext }}</div>
     </section>
     {% endif %}

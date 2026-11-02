@@ -8,28 +8,30 @@
 <article class="container pt-4">
     {% breadcrumbs %}
 
-    <header class="prose mb-4">
-        <p class="small text-body-secondary mb-1">{{ page.get_article_kind_display }}</p>
-        <h1 class="mb-3">{{ page.title }}</h1>
-        <p class="text-body-secondary mb-3">
-            By <a href="{% pageurl page.author %}">{{ page.author.title }}</a>
+    <header class="prose article-header mb-4">
+        <div class="mb-2">
+            <span class="card-kind-badge">{{ page.get_article_kind_display }}</span>
+        </div>
+        <h1 class="display-6 fw-bold text-dark mb-3">{{ page.title }}</h1>
+        <div class="article-meta-bar">
+            <span>By <a href="{% pageurl page.author %}" class="fw-semibold text-decoration-none">{{ page.author.title }}</a></span>
             {% if page.first_published_at %}
-            · Published <time datetime="{{ page.first_published_at|date:'Y-m-d' }}">{{ page.first_published_at|date:"j F Y" }}</time>
+            <span>&middot; Published <time datetime="{{ page.first_published_at|date:'Y-m-d' }}">{{ page.first_published_at|date:"j F Y" }}</time></span>
             {% endif %}
             {% if page.reviewed_date %}
-            · Reviewed <time datetime="{{ page.reviewed_date|date:'Y-m-d' }}">{{ page.reviewed_date|date:"j F Y" }}</time>
+            <span>&middot; Reviewed <time datetime="{{ page.reviewed_date|date:'Y-m-d' }}">{{ page.reviewed_date|date:"j F Y" }}</time></span>
             {% endif %}
-        </p>
-        <p class="lead">{{ page.excerpt }}</p>
+        </div>
+        <p class="lead text-secondary">{{ page.excerpt }}</p>
         {% include "components/telegram_cta.html" %}
     </header>
 
     {% if page.featured_image %}
     <figure class="mb-4">
         {# The hero image is the likely LCP element: not lazy, high priority. #}
-        {% image page.featured_image width-1200 class="img-fluid rounded" fetchpriority="high" %}
+        {% image page.featured_image width-1200 class="img-fluid rounded-4 shadow-sm" fetchpriority="high" %}
         {% if page.featured_image_credit %}
-        <figcaption class="small text-body-secondary mt-1">Image: {{ page.featured_image_credit }}</figcaption>
+        <figcaption class="small text-body-secondary mt-2">Image: {{ page.featured_image_credit }}</figcaption>
         {% endif %}
     </figure>
     {% endif %}
@@ -37,7 +39,7 @@
     {% if page.methodology %}
     <details class="methodology prose card card-body mb-4">
         <summary>How we researched this</summary>
-        <div class="mt-3">{{ page.methodology|richtext }}</div>
+        <div class="mt-3 text-secondary">{{ page.methodology|richtext }}</div>
     </details>
     {% endif %}
 
@@ -45,14 +47,20 @@
     {% if has_active_offers %}{% include "components/affiliate_disclosure.html" %}{% endif %}
 
     {% if quick_picks %}
-    <section class="prose mb-4" aria-labelledby="quick-picks-heading">
-        <h2 id="quick-picks-heading" class="h4">Quick picks</h2>
+    <section class="prose quick-picks-panel mb-5" aria-labelledby="quick-picks-heading">
+        <h2 id="quick-picks-heading" class="quick-picks-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-warning" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            Quick picks
+        </h2>
         <ul class="list-unstyled mb-0">
             {% for entry in quick_picks %}
-            <li class="mb-2">
-                <span class="badge text-bg-primary">{{ entry.card.recommendation_label }}</span>
-                <a href="#{{ entry.anchor }}">{{ entry.product.brand.name }} {{ entry.product.name }}</a>
-                {% if entry.card.best_for %}<span class="text-body-secondary"> &mdash; {{ entry.card.best_for }}</span>{% endif %}
+            <li class="quick-pick-item">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge text-bg-primary badge-top-pick">{{ entry.card.recommendation_label }}</span>
+                    <a href="#{{ entry.anchor }}" class="fw-bold text-dark text-decoration-none">{{ entry.product.brand.name }} {{ entry.product.name }}</a>
+                    {% if entry.card.best_for %}<span class="text-body-secondary small">&mdash; {{ entry.card.best_for }}</span>{% endif %}
+                </div>
+                <a href="#{{ entry.anchor }}" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 0.75rem;">Jump &darr;</a>
             </li>
             {% endfor %}
         </ul>
@@ -63,13 +71,16 @@
         {% include_block page.body %}
     </div>
 
+    {# Mid/bottom in-article manual placement (renders only when slot ID is configured and consent granted) #}
+    {% include "components/ad_slot.html" with slot="in_article" slot_id=adsense_in_article_slot_id class_name="my-5" %}
+
     {% if public_sources %}
-    <section class="prose mt-5" aria-labelledby="sources-heading">
-        <h2 id="sources-heading" class="h4">Sources</h2>
-        <ul>
+    <section class="prose mt-5 p-4 bg-light rounded-3 border" aria-labelledby="sources-heading">
+        <h2 id="sources-heading" class="h5 fw-bold mb-3">Sources</h2>
+        <ul class="small text-secondary mb-0">
             {% for source in public_sources %}
-            <li>
-                <a href="{{ source.url }}" rel="noopener nofollow">{{ source.source_name }}</a>
+            <li class="mb-1">
+                <a href="{{ source.url }}" rel="noopener nofollow" class="fw-semibold">{{ source.source_name }}</a>
                 <span class="text-body-secondary">(accessed {{ source.accessed_on|date:"j F Y" }})</span>
             </li>
             {% endfor %}
@@ -80,7 +91,7 @@
     {% with tags=page.tags.all %}
     {% if tags %}
     <ul class="list-inline mt-4" aria-label="Tags">
-        {% for tag in tags %}<li class="list-inline-item"><span class="badge text-bg-light border">{{ tag.name }}</span></li>{% endfor %}
+        {% for tag in tags %}<li class="list-inline-item"><span class="badge text-bg-light border text-secondary">{{ tag.name }}</span></li>{% endfor %}
     </ul>
     {% endif %}
     {% endwith %}
@@ -92,8 +103,13 @@
 
 {% if related_articles %}
 <section class="container my-5" aria-labelledby="related-heading">
-    <h2 id="related-heading" class="h3 mb-3">Related guides</h2>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="small text-uppercase fw-bold text-primary mb-1">More Like This</p>
+            <h2 id="related-heading" class="h3 fw-bold mb-0">Related guides</h2>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for article in related_articles %}
         <div class="col">{% include "components/article_card.html" with article=article %}</div>
         {% endfor %}

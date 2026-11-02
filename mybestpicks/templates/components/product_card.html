@@ -2,68 +2,80 @@
 {# Reads only value.resolved (a ProductEntry set by ArticlePage.get_context). No queries here. #}
 {% with entry=value.resolved %}{% if entry %}{% with product=entry.product %}
 <section class="product-card card my-4" id="{{ entry.anchor }}" aria-labelledby="{{ entry.anchor }}-title">
-    <div class="card-body">
-        {% if value.recommendation_label %}<p class="mb-2"><span class="badge text-bg-primary">{{ value.recommendation_label }}</span></p>{% endif %}
-        <h3 class="h4" id="{{ entry.anchor }}-title">{{ product.brand.name }} {{ product.name }}</h3>
-        {% if value.best_for %}<p class="text-body-secondary mb-3">Best for: {{ value.best_for }}</p>{% endif %}
+    <div class="card-header bg-light py-3 px-4 d-flex flex-wrap align-items-center justify-content-between gap-2 border-bottom">
+        <div>
+            {% if value.recommendation_label %}
+            <span class="badge text-bg-primary badge-top-pick mb-1">{{ value.recommendation_label }}</span>
+            {% endif %}
+            <h3 class="h4 mb-0" id="{{ entry.anchor }}-title">{{ product.brand.name }} {{ product.name }}</h3>
+        </div>
+        {% if value.best_for %}
+        <span class="badge text-bg-light border text-secondary fw-normal">Best for: {{ value.best_for }}</span>
+        {% endif %}
+    </div>
 
-        <div class="row g-3">
+    <div class="card-body p-4">
+        <div class="row g-4">
             {% if product.image %}
             <div class="col-md-4">
-                {% image product.image width-400 alt=product.name class="img-fluid rounded" loading="lazy" %}
-                {% if product.image_credit %}<p class="small text-body-secondary mt-1 mb-0">Image: {{ product.image_credit }}</p>{% endif %}
+                <div class="p-2 border rounded-3 bg-light text-center">
+                    {% image product.image width-400 alt=product.name class="img-fluid rounded" loading="lazy" %}
+                </div>
+                {% if product.image_credit %}<p class="small text-body-secondary mt-1 mb-0" style="font-size: 0.75rem;">Image: {{ product.image_credit }}</p>{% endif %}
             </div>
             {% endif %}
             <div class="{% if product.image %}col-md-8{% else %}col-12{% endif %}">
-                <div>{{ value.verdict|richtext }}</div>
+                <div class="prose mb-3">{{ value.verdict|richtext }}</div>
 
                 {% if value.pros or value.cons %}
-                <div class="row g-3 mb-3">
+                <div class="pros-cons-grid mb-3">
                     {% if value.pros %}
-                    <div class="col-sm-6">
+                    <div class="pros-box">
                         <h4 class="h6">Pros</h4>
-                        <ul class="mb-0">{% for pro in value.pros %}<li>{{ pro }}</li>{% endfor %}</ul>
+                        <ul>{% for pro in value.pros %}<li>{{ pro }}</li>{% endfor %}</ul>
                     </div>
                     {% endif %}
                     {% if value.cons %}
-                    <div class="col-sm-6">
+                    <div class="cons-box">
                         <h4 class="h6">Cons</h4>
-                        <ul class="mb-0">{% for con in value.cons %}<li>{{ con }}</li>{% endfor %}</ul>
+                        <ul>{% for con in value.cons %}<li>{{ con }}</li>{% endfor %}</ul>
                     </div>
                     {% endif %}
                 </div>
                 {% endif %}
 
-                <dl class="row small mb-3">
-                    {% for row in entry.spec_rows %}{% if row.display_value %}
-                    <dt class="col-6 col-sm-5">{{ row.label }}</dt>
-                    <dd class="col-6 col-sm-7 mb-1">{{ row.display_value }}</dd>
-                    {% endif %}{% endfor %}
-                </dl>
+                <div class="specs-table mb-3">
+                    <dl class="row small mb-0">
+                        {% for row in entry.spec_rows %}{% if row.display_value %}
+                        <dt class="col-5 col-sm-4 text-truncate">{{ row.label }}</dt>
+                        <dd class="col-7 col-sm-8 mb-1">{{ row.display_value }}</dd>
+                        {% endif %}{% endfor %}
+                    </dl>
+                </div>
 
                 {% if value.tested_by_editor %}
-                <div class="small border-start border-3 ps-3 mb-3">
+                <div class="tested-callout small mb-3">
                     <p class="mb-1"><span class="badge text-bg-success">Hands-on tested by our editor</span></p>
-                    {% if value.editorial_evidence %}<p class="mb-1">{{ value.editorial_evidence }}</p>{% endif %}
+                    {% if value.editorial_evidence %}<p class="mb-1 text-secondary">{{ value.editorial_evidence }}</p>{% endif %}
                     {% if value.evidence_media %}
-                    {% image value.evidence_media width-640 alt="Our own photo of this product" class="img-fluid rounded" loading="lazy" %}
+                    {% image value.evidence_media width-640 alt="Our own photo of this product" class="img-fluid rounded mt-2" loading="lazy" %}
                     {% endif %}
                 </div>
                 {% else %}
-                <p class="small text-body-secondary">Based on desk research; we have not used this product.</p>
+                <p class="small text-body-secondary mb-3">Based on desk research; we have not used this product.</p>
                 {% endif %}
 
                 {% if product.status == "discontinued" %}
-                <p class="small text-danger">This product has been discontinued.</p>
+                <p class="small text-danger fw-semibold">This product has been discontinued.</p>
                 {% elif product.status == "unavailable" %}
                 <p class="small text-body-secondary">This product may be temporarily out of stock.</p>
                 {% endif %}
                 {% if product.last_verified_at %}
-                <p class="small text-body-secondary">Facts checked {{ product.last_verified_at|date:"j F Y" }}.</p>
+                <p class="small text-body-secondary mb-3">Facts checked {{ product.last_verified_at|date:"j F Y" }}.</p>
                 {% endif %}
 
                 {% if entry.offers %}
-                <p class="mb-0 d-flex flex-wrap gap-2">
+                <p class="mb-0 d-flex flex-wrap gap-2 pt-2 border-top">
                     {% for offer in entry.offers %}
                     <a class="btn btn-primary" href="{{ offer.affiliate_url }}" rel="sponsored nofollow noopener">{{ offer.merchant.cta_label }}</a>
                     {% endfor %}

@@ -6,27 +6,37 @@
 {% block content %}
 <div class="container pt-4">
     {% breadcrumbs %}
-    <div class="row">
-        <div class="col-lg-8">
-            <h1>{{ page.title }}</h1>
-            {% if page.expertise %}<p class="lead">{{ page.expertise }}</p>{% endif %}
-            <div class="prose">{{ page.bio|richtext }}</div>
-            {% if page.experience %}
-            <h2 class="h4 mt-4">Research and testing experience</h2>
-            <div class="prose">{{ page.experience|richtext }}</div>
+    <div class="card p-4 p-md-5 mb-5 bg-light border rounded-4 shadow-sm">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-8">
+                <span class="card-kind-badge mb-2">Editorial Staff</span>
+                <h1 class="display-6 fw-bold text-dark mb-2">{{ page.title }}</h1>
+                {% if page.expertise %}
+                <p class="lead fw-semibold text-primary mb-3">{{ page.expertise }}</p>
+                {% endif %}
+                <div class="prose text-secondary">{{ page.bio|richtext }}</div>
+                {% if page.experience %}
+                <h2 class="h5 fw-bold text-dark mt-4">Research and testing experience</h2>
+                <div class="prose text-secondary">{{ page.experience|richtext }}</div>
+                {% endif %}
+            </div>
+            {% if page.photo %}
+            <div class="col-lg-4 text-center">
+                {% image page.photo fill-400x400 class="img-fluid rounded-4 shadow-sm" style="max-width: 280px;" %}
+            </div>
             {% endif %}
         </div>
-        {% if page.photo %}
-        <div class="col-lg-4 mt-3 mt-lg-0">
-            {% image page.photo fill-400x400 class="img-fluid rounded" %}
-        </div>
-        {% endif %}
     </div>
 
     {% if articles %}
     <section class="my-5" aria-labelledby="by-author-heading">
-        <h2 id="by-author-heading" class="h3 mb-3">Guides by {{ page.title }}</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Author Archive</p>
+                <h2 id="by-author-heading" class="h3 fw-bold mb-0">Guides by {{ page.title }}</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for article in articles %}
             <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}

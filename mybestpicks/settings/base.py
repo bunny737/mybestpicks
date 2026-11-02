@@ -199,3 +199,11 @@ WAGTAILDOCS_EXTENSIONS = [
 
 # Maximum upload size for documents in bytes.
 WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
+
+
+# Google AdSense defaults (Module 12, P2/post-launch; disabled by default)
+ADSENSE_PUBLISHER_ID = env("ADSENSE_PUBLISHER_ID", default="")
+ADSENSE_ENABLED = env.bool("ADSENSE_ENABLED", default=False)
+ADSENSE_AUTO_ADS = env.bool("ADSENSE_AUTO_ADS", default=False)
+ADSENSE_IN_ARTICLE_SLOT_ID = env("ADSENSE_IN_ARTICLE_SLOT_ID", default="")
+ADSENSE_FEED_SLOT_ID = env("ADSENSE_FEED_SLOT_ID", default="")

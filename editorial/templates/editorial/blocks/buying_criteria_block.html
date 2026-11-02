@@ -1,6 +1,9 @@
-<section class="my-4">
-    <h2 class="h4">{{ value.heading }}</h2>
-    <dl>
+<section class="my-4 p-4 bg-light rounded-4 border shadow-sm">
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-primary" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <h2 class="h4 fw-bold mb-0 text-dark">{{ value.heading }}</h2>
+    </div>
+    <dl class="mb-0">
         {% for criterion in value.criteria %}
         <dt>{{ criterion.name }}</dt>
         <dd>{{ criterion.why }}</dd>

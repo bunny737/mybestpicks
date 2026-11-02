@@ -1,0 +1,12 @@
+{# Google AdSense Head Tag (Module 12) #}
+{# Active only when enabled, publisher ID is valid, user consent is granted, and page is an eligible content page (ArticlePage) #}
+{% if adsense_is_eligible and adsense_client_id and not request.in_preview_panel and page and page.content_type.model == 'articlepage' %}
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ adsense_client_id }}"
+        crossorigin="anonymous"></script>
+<script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+        google_ad_client: "{{ adsense_client_id }}",
+        enable_page_level_ads: {% if adsense_auto_ads %}true{% else %}false{% endif %}
+    });
+</script>
+{% endif %}

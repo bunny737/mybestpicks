@@ -1,4 +1,7 @@
-<aside class="key-takeaways card card-body bg-body-tertiary my-4" aria-label="{{ value.heading }}">
-    <h2 class="h5">{{ value.heading }}</h2>
-    <ul class="mb-0">{% for point in value.points %}<li>{{ point }}</li>{% endfor %}</ul>
+<aside class="key-takeaways card card-body bg-light border-start border-4 border-primary rounded-3 my-4 p-4 shadow-sm" aria-label="{{ value.heading }}">
+    <div class="d-flex align-items-center gap-2 mb-2">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-primary" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <h2 class="h5 fw-bold mb-0 text-dark">{{ value.heading }}</h2>
+    </div>
+    <ul class="mb-0 ps-3">{% for point in value.points %}<li>{{ point }}</li>{% endfor %}</ul>
 </aside>

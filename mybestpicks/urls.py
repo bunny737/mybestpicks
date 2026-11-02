@@ -9,7 +9,7 @@ from wagtail.documents import urls as wagtaildocs_urls
 from search import views as search_views
 from seo.feeds import ArticleFeed
 from seo.sitemaps import PublicSitemap
-from seo.views import robots_txt
+from seo.views import ads_txt, robots_txt
 
 urlpatterns = [
     path("django-admin/", admin.site.urls),
@@ -23,6 +23,7 @@ urlpatterns = [
         name="sitemap",
     ),
     path("robots.txt", robots_txt, name="robots_txt"),
+    path("ads.txt", ads_txt, name="ads_txt"),
     path("feed/", ArticleFeed(), name="article_feed"),
 ]
 

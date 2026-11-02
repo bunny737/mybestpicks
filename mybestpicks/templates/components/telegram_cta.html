@@ -1,6 +1,9 @@
 {% with site_settings=settings.home.SiteSettings %}
 {% if site_settings.telegram_channel_url %}
-<a class="btn btn-outline-primary" href="{{ site_settings.telegram_channel_url }}"
-   rel="noopener">{{ site_settings.telegram_channel_label|default:"Join on Telegram" }}</a>
+<a class="btn btn-outline-primary telegram-pill" href="{{ site_settings.telegram_channel_url }}"
+   rel="noopener">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    <span>{{ site_settings.telegram_channel_label|default:"Join on Telegram" }}</span>
+</a>
 {% endif %}
 {% endwith %}

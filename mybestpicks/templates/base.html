@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{% static 'css/mybestpicks.css' %}">
     {% block extra_css %}{% endblock %}
     {% json_ld page %}
+    {% include "components/adsense_script.html" %}
     {% block extra_head %}{% endblock %}
 </head>
 
@@ -24,17 +25,28 @@
     <a class="skip-link" href="#main-content">Skip to main content</a>
     {% wagtailuserbar %}
 
-    <header class="site-header border-bottom bg-body">
+    <aside class="top-trust-bar" aria-label="Editorial mission">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span>MyBestPicks &middot; Buying guides and product comparisons for shoppers in India</span>
+            <span class="d-none d-md-inline">Editorial Setup &middot; Independent Choices</span>
+        </div>
+    </aside>
+
+    <header class="site-header border-bottom">
         <nav class="navbar navbar-expand-lg" aria-label="Primary">
             <div class="container">
-                <a class="navbar-brand fw-bold" href="/">MyBestPicks</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                <a class="navbar-brand fw-bold" href="/">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    <span>MyBestPicks</span>
+                    <span class="brand-badge ms-1">India</span>
+                </a>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
                         data-bs-target="#primary-nav" aria-controls="primary-nav"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="primary-nav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                         {% for category in nav_categories %}
                         <li class="nav-item">
                             <a class="nav-link{% if category.nav_current %} active{% endif %}"
@@ -42,12 +54,12 @@
                         </li>
                         {% endfor %}
                     </ul>
-                    <form class="d-flex" role="search" action="{% url 'search' %}" method="get">
+                    <form class="d-flex search-input-group mt-2 mt-lg-0" role="search" action="{% url 'search' %}" method="get">
                         <label class="visually-hidden" for="site-search">Search guides</label>
-                        <input class="form-control me-2" id="site-search" type="search"
-                               name="query" placeholder="Search guides"
+                        <input class="form-control" id="site-search" type="search"
+                               name="query" placeholder="Search buying guides..."
                                value="{{ search_query|default:'' }}">
-                        <button class="btn btn-outline-primary" type="submit">Search</button>
+                        <button class="btn btn-primary" type="submit" aria-label="Search">Search</button>
                     </form>
                 </div>
             </div>
@@ -58,42 +70,48 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="site-footer border-top bg-body-tertiary mt-5 py-4">
+    <footer class="site-footer mt-5 py-5">
         <div class="container">
             <div class="row gy-4">
-                <div class="col-md-5">
-                    <p class="fw-bold mb-1">MyBestPicks</p>
-                    <p class="text-body-secondary small mb-0">
-                        Independent buying guides and honest comparisons for shoppers in India.
+                <div class="col-lg-5 col-md-12">
+                    <p class="fw-bold fs-5 mb-2 text-white">MyBestPicks</p>
+                    <p class="small text-secondary mb-3">
+                        Independent buying guides, rigorous product comparisons, and honest explainers built specifically for shoppers in India. We verify specs, test where possible, and never recommend products solely for commission.
                     </p>
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        {% include "components/telegram_cta.html" %}
+                        <a href="{% url 'article_feed' %}" class="btn btn-sm btn-outline-secondary text-white-50 border-secondary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1 align-text-bottom" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg>
+                            RSS Feed
+                        </a>
+                    </div>
                 </div>
                 {# Categories are repeated here so navigation still works without JavaScript. #}
                 {% if nav_categories %}
-                <nav class="col-6 col-md-3" aria-label="Categories">
-                    <p class="fw-semibold mb-2">Categories</p>
+                <nav class="col-6 col-md-3 col-lg-3" aria-label="Categories">
+                    <p class="fw-semibold text-white mb-3">Categories</p>
                     <ul class="list-unstyled mb-0">
                         {% for category in nav_categories %}
-                        <li><a href="{% pageurl category %}">{{ category.title }}</a></li>
+                        <li class="mb-2"><a href="{% pageurl category %}">{{ category.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </nav>
                 {% endif %}
                 {% if footer_pages %}
-                <nav class="col-6 col-md-4" aria-label="About and policies">
-                    <p class="fw-semibold mb-2">About and policies</p>
+                <nav class="col-6 col-md-3 col-lg-4" aria-label="About and policies">
+                    <p class="fw-semibold text-white mb-3">About &amp; Policies</p>
                     <ul class="list-unstyled mb-0">
                         {% for footer_page in footer_pages %}
-                        <li><a href="{% pageurl footer_page %}">{{ footer_page.title }}</a></li>
+                        <li class="mb-2"><a href="{% pageurl footer_page %}">{{ footer_page.title }}</a></li>
                         {% endfor %}
                     </ul>
                 </nav>
                 {% endif %}
             </div>
-            <div class="d-flex flex-wrap gap-3 align-items-center mt-4">
-                <a href="{% url 'article_feed' %}">RSS feed</a>
-                {% include "components/telegram_cta.html" %}
+
+            <div class="border-top border-secondary border-opacity-25 mt-4 pt-4 text-secondary small">
+                <p class="mb-0">&copy; {% now "Y" %} MyBestPicks.in. All rights reserved.</p>
             </div>
-            <p class="text-body-secondary small mt-4 mb-0">&copy; {% now "Y" %} MyBestPicks</p>
         </div>
     </footer>
 

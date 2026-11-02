@@ -6,42 +6,58 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-<div class="container pt-4">
-    <h1 class="mb-3">Search</h1>
+{% with is_non_content_page=True %}
+<div class="container pt-4 pb-5">
+    <div class="prose mx-auto">
+        <header class="mb-4">
+            <h1 class="display-6 fw-bold text-dark mb-3">Search Guides</h1>
+            <p class="text-secondary small">Find thoroughly researched buying guides, comparisons, and product reviews.</p>
+        </header>
 
-    <form class="row g-2 mb-4" action="{% url 'search' %}" method="get" role="search">
-        <div class="col-12 col-sm">
-            <label class="visually-hidden" for="search-page-query">Search guides</label>
-            <input class="form-control" id="search-page-query" type="search" name="query"
-                   {% if search_query %}value="{{ search_query }}"{% endif %}>
+        <form class="row g-2 mb-4" action="{% url 'search' %}" method="get" role="search">
+            <div class="col-12 col-sm">
+                <label class="visually-hidden" for="search-page-query">Search guides</label>
+                <input class="form-control form-control-lg fs-6" id="search-page-query" type="search" name="query"
+                       placeholder="e.g. Mechanical keyboard, Ergonomic chair..."
+                       {% if search_query %}value="{{ search_query }}"{% endif %}>
+            </div>
+            <div class="col-12 col-sm-auto">
+                <button class="btn btn-primary btn-lg fs-6 px-4" type="submit">Search</button>
+            </div>
+        </form>
+
+        {% if search_results %}
+        <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom">
+            <span class="small text-secondary fw-semibold">Results for &ldquo;{{ search_query }}&rdquo;</span>
+            <span class="badge text-bg-light border text-secondary">{{ search_results.paginator.count }} result{{ search_results.paginator.count|pluralize }}</span>
         </div>
-        <div class="col-12 col-sm-auto">
-            <button class="btn btn-primary" type="submit">Search</button>
-        </div>
-    </form>
 
-    {% if search_results %}
-    <ul class="list-unstyled prose">
-        {% for result in search_results %}
-        <li class="mb-3">
-            <h2 class="h5 mb-1"><a href="{% pageurl result %}">{{ result }}</a></h2>
-            {% if result.search_description %}<p class="mb-0">{{ result.search_description }}</p>{% endif %}
-        </li>
-        {% endfor %}
-    </ul>
-
-    <nav aria-label="Search results pages">
-        <ul class="pagination">
-            {% if search_results.has_previous %}
-            <li class="page-item"><a class="page-link" href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a></li>
-            {% endif %}
-            {% if search_results.has_next %}
-            <li class="page-item"><a class="page-link" href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a></li>
-            {% endif %}
+        <ul class="list-unstyled">
+            {% for result in search_results %}
+            <li class="card p-3 mb-3 border rounded-3 shadow-sm">
+                <h2 class="h5 fw-bold mb-1"><a href="{% pageurl result %}" class="text-dark text-decoration-none">{{ result }}</a></h2>
+                {% if result.search_description %}<p class="text-secondary small mb-0">{{ result.search_description }}</p>{% endif %}
+            </li>
+            {% endfor %}
         </ul>
-    </nav>
-    {% elif search_query %}
-    <p>No results found for “{{ search_query }}”. Try a different word.</p>
-    {% endif %}
+
+        <nav aria-label="Search results pages" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if search_results.has_previous %}
+                <li class="page-item"><a class="page-link" href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.previous_page_number }}">Previous</a></li>
+                {% endif %}
+                {% if search_results.has_next %}
+                <li class="page-item"><a class="page-link" href="{% url 'search' %}?query={{ search_query|urlencode }}&amp;page={{ search_results.next_page_number }}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% elif search_query %}
+        <div class="p-4 bg-light rounded-4 text-center border my-4">
+            <p class="h5 fw-bold text-dark mb-1">No results found for &ldquo;{{ search_query }}&rdquo;</p>
+            <p class="text-secondary small mb-0">Try checking your spelling or search for broader keywords like &ldquo;keyboard&rdquo; or &ldquo;monitor&rdquo;.</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
+{% endwith %}
 {% endblock %}

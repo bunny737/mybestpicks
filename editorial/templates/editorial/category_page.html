@@ -6,13 +6,23 @@
 {% block content %}
 <div class="container pt-4">
     {% breadcrumbs %}
-    <h1 class="mb-3">{{ page.title }}</h1>
-    {% if page.introduction %}<div class="prose lead">{{ page.introduction|richtext }}</div>{% endif %}
+    <header class="mb-5 pb-4 border-bottom">
+        <span class="card-kind-badge mb-2">Category Hub</span>
+        <h1 class="display-5 fw-bold text-dark mb-3">{{ page.title }}</h1>
+        {% if page.introduction %}
+        <div class="prose lead text-secondary">{{ page.introduction|richtext }}</div>
+        {% endif %}
+    </header>
 
     {% if featured_articles %}
     <section class="my-5" aria-labelledby="featured-heading">
-        <h2 id="featured-heading" class="h3 mb-3">Featured guides</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Featured</p>
+                <h2 id="featured-heading" class="h3 fw-bold mb-0">Featured guides</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for article in featured_articles %}
             <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
@@ -22,17 +32,22 @@
 
     {% if articles %}
     <section class="my-5" aria-labelledby="articles-heading">
-        <h2 id="articles-heading" class="h3 mb-3">All guides</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <p class="small text-uppercase fw-bold text-primary mb-1">Archive</p>
+                <h2 id="articles-heading" class="h3 fw-bold mb-0">All guides</h2>
+            </div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for article in articles %}
             <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
         </div>
     </section>
     {% else %}
-    <div class="my-5 p-4 bg-body-tertiary rounded prose">
-        <h2 class="h4">Guides for this category are coming soon.</h2>
-        <p class="mb-0">We only publish a guide when it has been properly researched. Check back shortly.</p>
+    <div class="my-5 p-5 bg-light rounded-4 border text-center prose mx-auto">
+        <h2 class="h4 fw-bold">Guides for this category are coming soon.</h2>
+        <p class="text-secondary mb-0">We only publish a guide when it has been properly researched and verified. Check back shortly.</p>
     </div>
     {% endif %}
 </div>

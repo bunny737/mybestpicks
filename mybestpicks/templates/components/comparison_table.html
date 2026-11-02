@@ -1,21 +1,21 @@
 {# `table` comes from ComparisonTableBlock.get_context; None means nothing to compare. #}
 {% if table %}
 <section class="my-4" aria-label="{% if value.heading %}{{ value.heading }}{% else %}Comparison table{% endif %}">
-    {% if value.heading %}<h2 class="h4">{{ value.heading }}</h2>{% endif %}
+    {% if value.heading %}<h2 class="h4 fw-bold mb-3">{{ value.heading }}</h2>{% endif %}
     <div class="table-scroll">
-        <table class="table table-bordered table-sm align-middle comparison-table">
+        <table class="table table-bordered table-hover table-striped align-middle comparison-table mb-0">
             <caption class="visually-hidden">{% if value.heading %}{{ value.heading }}{% else %}Comparison of the products in this guide{% endif %}</caption>
             <thead class="table-light">
                 <tr>
-                    <th scope="col">Product</th>
-                    {% for column in table.columns %}<th scope="col">{{ column.label }}</th>{% endfor %}
+                    <th scope="col" class="py-3 px-3">Product</th>
+                    {% for column in table.columns %}<th scope="col" class="py-3 px-3">{{ column.label }}</th>{% endfor %}
                 </tr>
             </thead>
             <tbody>
                 {% for row in table.rows %}
                 <tr>
-                    <th scope="row"><a href="#{{ row.entry.anchor }}">{{ row.entry.product.brand.name }} {{ row.entry.product.name }}</a></th>
-                    {% for cell in row.cells %}<td>{{ cell }}</td>{% endfor %}
+                    <th scope="row" class="px-3"><a href="#{{ row.entry.anchor }}" class="fw-bold text-decoration-none">{{ row.entry.product.brand.name }} {{ row.entry.product.name }}</a></th>
+                    {% for cell in row.cells %}<td class="px-3">{{ cell }}</td>{% endfor %}
                 </tr>
                 {% endfor %}
             </tbody>

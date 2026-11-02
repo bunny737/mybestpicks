@@ -1,9 +1,14 @@
 {% load wagtailcore_tags %}
 {# Rendered ONCE, before the first CTA, and only when an offer will render. #}
 <aside class="affiliate-disclosure alert alert-light border small prose" role="note" aria-label="Affiliate disclosure">
-    Some links on this page are affiliate links. If you buy through one, we may earn a
-    commission at no extra cost to you. It does not change what we recommend.
-    {% if affiliate_disclosure_page %}
-    <a href="{% pageurl affiliate_disclosure_page %}">Read our affiliate disclosure</a>.
-    {% endif %}
+    <div class="d-flex align-items-start gap-2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary mt-1 flex-shrink-0" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <div>
+            Some links on this page are affiliate links. If you buy through one, we may earn a
+            commission at no extra cost to you. It does not change what we recommend.
+            {% if affiliate_disclosure_page %}
+            <a href="{% pageurl affiliate_disclosure_page %}">Read our affiliate disclosure</a>.
+            {% endif %}
+        </div>
+    </div>
 </aside>
