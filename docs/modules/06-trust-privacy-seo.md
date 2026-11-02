@@ -133,6 +133,19 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
   `SiteSettings.contact_email` (new field) is blank by default and renders
   nothing — and the Contact page template shows no mailto link — until the owner
   sets it; never invented.
+- [DECISION 2026-11-02] Fixed a migration-ordering bug in
+  `editorial/migrations/0004_seed_policy_pages.py` found while verifying the test
+  suite before the module 07 deploy: saving real `StandardPage`/`HomePage`
+  instances fires Wagtail's search-indexing signal, but the migration had no
+  dependency forcing `wagtailsearch`'s own migrations to run first. On a
+  from-scratch database (a fresh CI run, or `manage.py test`) Django's migration
+  graph could place 0004 before `wagtailsearch.0010_add_text_fields`, so the
+  signal handler failed with "relation wagtailsearch_indexentry does not exist".
+  Added an explicit dependency on `("wagtailsearch", "0010_add_text_fields")`.
+  CI on `main` was actually red at the time (confirmed via the GitHub API) despite
+  the module status board showing this module done — the bug had been masked
+  locally by an incrementally-migrated dev database that never exercised a
+  from-scratch migration run. All 333 tests pass after the fix.
 - [OPEN] Is a consent banner needed? Decide after the privacy review of the Umami
   setup, hosting region and DPDP phase dates (module 09). This is independent of
   everything else in this module and does not block its completion.
@@ -158,3 +171,6 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
   `Disallow: /subscribe/` to robots.txt and a site-wide Django-messages display
   in `base.html`. Tests: `home/tests/test_email_signup.py`,
   `editorial/tests/test_policy_pages.py`.
+- 2026-11-02  Fixed the `wagtailsearch` migration-ordering bug in
+  `editorial/migrations/0004_seed_policy_pages.py` (see Decisions). All 333 tests
+  pass on a from-scratch database.

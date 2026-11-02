@@ -255,6 +255,11 @@ class Migration(migrations.Migration):
     dependencies = [
         ("editorial", "0003_alter_articlepage_body"),
         ("home", "0008_sitesettings_contact_email"),
+        # Saving real StandardPage/HomePage instances (see module docstring) fires
+        # Wagtail's search-indexing signal. On a from-scratch database, without this
+        # dependency the migration graph can place this migration before
+        # wagtailsearch's own migrations, so the index table does not exist yet.
+        ("wagtailsearch", "0010_add_text_fields"),
     ]
 
     operations = [

@@ -3,25 +3,35 @@
 Plan reference: [mybestpicks_plan_v4.md §9](mybestpicks_plan_v4.md). Module spec:
 [modules/07-release-pipeline.md](modules/07-release-pipeline.md).
 
-Status: **not deployed, and on hold: no deployment until development is finished**
-(owner decision 2026-11-02). Do not provision a server, change DNS or deploy from
-this runbook until the owner says so. The provider, backup destination and
-monitoring tool are still open (see the module 07 spec). Treat the first run as a test of this runbook,
-and correct this file afterwards.
+Status: **live** at https://mybestpicks.in (owner lifted the deployment hold on
+2026-11-02). Backups for the app VM's media volume, uptime/error monitoring, a
+restore rehearsal and a repeatable deploy script are still open — see the
+module 07 spec for details and as-built specifics (exact resource names, IPs,
+decisions). This file is being corrected to match the as-built deploy as that
+work continues.
 
 ## 1. Architecture
 
 ```
-(optional) Cloudflare DNS/proxy
-  mybestpicks.in        → VPS
-  www.mybestpicks.in    → VPS → 301 → https://mybestpicks.in/   (apex is canonical)
-VPS (Docker Compose)
-  nginx    :80 → 301 https · :443 TLS · static/media · /admin/ hardening
-  app      gunicorn + Django/Wagtail (production settings, WhiteNoise)
-  db       PostgreSQL           volume: pgdata
-           media                volume: media   (originals + Wagtail renditions)
-  backup   nightly pg_dump + media archive → off-box destination
+mybestpicks.in, www.mybestpicks.in  → GCP static IP 35.234.223.110 (GoDaddy DNS)
+
+mybestpicks-app VM (GCP e2-micro, asia-south1-a, project pglive-prod, Docker Compose)
+  nginx    :80 → 301 https · :443 TLS (Let's Encrypt, certbot --webroot on the
+           host) · www → apex 301 · /media/ served directly · everything else
+           proxied to app
+  app      gunicorn + Django/Wagtail (production settings, WhiteNoise for
+           static, baked into the image at build time)
+           media    volume: media   (originals + Wagtail renditions)
 later: umami (own service, own DB/user), module 09
+
+Shared Cloud SQL instance pglive-pg-prod (Postgres 16, asia-south1-c, project
+pglive-prod) — also hosts pglive.in and mytravelplanner.in's databases.
+  mybestpicks has its own database + role on this instance — never a shared
+  schema/role with the other sites. Connection is public IP + password auth +
+  sslmode=require, locked to the app VM's IP via Cloud SQL authorized networks.
+  backup   Cloud SQL's own automated backups (already enabled on this
+           instance: 14 retained, point-in-time recovery) — nothing extra
+           needed on the DB side. The media volume above has no backup yet.
 ```
 
 Object storage for media is deferred until it is needed.
@@ -30,19 +40,27 @@ Object storage for media is deferred until it is needed.
 1. **Back up and inspect** the current `mybestpicks.in` DNS records and any existing
    site. Make sure no important content or email (MX) records get overwritten.
 2. Confirm domain control and registrar access.
-3. Choose a provider and size. Do not pick a vendor on a teaser price alone (plan
-   budget: about ₹3,000–8,000 for the first 90 days in total).
+3. Choose a provider and size for the mybestpicks **app** VPS. Do not pick a vendor
+   on a teaser price alone (plan budget: about ₹3,000–8,000 for the first 90 days
+   in total).
+4. On the **shared Postgres instance** (the pglive.in/mytravelplanner.in DB host),
+   create a dedicated `mybestpicks` database and a dedicated role with its own
+   password — not reused from another site. Open the DB port's firewall /
+   `pg_hba.conf` to the new app VPS's IP specifically.
 
 ## 3. Deployment sequence
-1. Provision the VPS: OS updates, a non-root deploy user, SSH keys only, a firewall
-   (22/80/443), and Docker with Compose.
+1. Provision the app VPS: OS updates, a non-root deploy user, SSH keys only, a
+   firewall (22/80/443), and Docker with Compose. **No local Postgres container** —
+   the DB lives on the shared instance.
 2. Create the env/secret file on the host (never in git): `SECRET_KEY`,
-   `DATABASE_URL`, `ALLOWED_HOSTS=mybestpicks.in,www.mybestpicks.in`,
+   `DATABASE_URL` (pointing at the shared DB host, `sslmode=require`),
+   `ALLOWED_HOSTS=mybestpicks.in,www.mybestpicks.in`,
    `CSRF_TRUSTED_ORIGINS=https://mybestpicks.in`,
    `WAGTAILADMIN_BASE_URL=https://mybestpicks.in`,
    `SITE_URL=https://mybestpicks.in`, and
    `DJANGO_SETTINGS_MODULE=mybestpicks.settings.production`.
-3. Start `db`, then deploy the pinned app image.
+3. Confirm the app VPS can reach the shared DB host over TLS on the DB port, then
+   deploy the pinned app image.
 4. `python manage.py migrate` → `python manage.py collectstatic --noinput` →
    `python manage.py check --deploy`.
 5. Check that the media volume persists: upload an image, render a rendition, restart
@@ -59,21 +77,28 @@ Object storage for media is deferred until it is needed.
     (below), then rehearse a restore.
 
 ## 4. Routine deploy
+As built, every deploy so far has been run by hand over SSH (no repeatable
+script yet — see module 07's open questions):
 ```bash
-git pull                      # or pull the tagged image
-docker compose -f compose.yaml -f compose.prod.yaml build app
-docker compose ... run --rm app python manage.py migrate
-docker compose ... run --rm app python manage.py collectstatic --noinput
-docker compose ... up -d app nginx
+# locally: package the repo (excluding .venv, .git, media, __pycache__) and
+# scp the tarball to the VM, keeping the existing .env.production in place.
+cd ~/mybestpicks
+docker-compose -f compose.prod.yaml build app
+docker-compose -f compose.prod.yaml run --rm app python manage.py migrate
+docker-compose -f compose.prod.yaml up -d app nginx
 # smoke test (step 8), then run update_index if search_fields changed (module 08)
 ```
-Update the file names above to the real ones once module 07 exists.
+Note: this VM has `docker-compose` (classic v1), not the `docker compose` v2
+plugin — Debian 12 doesn't package the v2 plugin (see module 07 Decisions).
+If a future VM has v2, swap in `docker compose`.
 
 ## 5. Backups and restore
-- **Nightly:** `pg_dump -Fc` plus a tar of the media volume, copied to an off-box
-  destination. Keep a retention policy (for example 7 daily and 4 weekly; decide
-  and record it).
-- **Restore rehearsal** (target: week 8): restore both into a clean environment,
+- **DB:** already covered by Cloud SQL's own automated backups on
+  `pglive-pg-prod` (14 retained, point-in-time recovery) — nothing extra to run.
+- **Media (not done yet):** needs a nightly tar of the app VM's `media` volume
+  copied to an off-box destination, with a retention policy (for example 7
+  daily and 4 weekly; decide and record it).
+- **Restore rehearsal (not done yet):** restore both into a clean environment,
   then confirm pages, images and admin login work. Record the date in module 07.
 
 ## 6. Rollback

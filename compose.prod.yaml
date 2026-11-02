@@ -1,0 +1,32 @@
+# Production: app (gunicorn) + nginx. PostgreSQL is NOT a service here — it runs
+# on the shared Cloud SQL instance used by pglive.in/mytravelplanner.in (module 07
+# decision, 2026-11-02). See docs/deployment.md.
+services:
+  app:
+    build: .
+    image: mybestpicks-app:latest
+    restart: unless-stopped
+    env_file: .env.production
+    expose:
+      - "8000"
+    volumes:
+      - media:/app/media
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf:ro
+      - media:/app/media:ro
+      # Host-run certbot (not containerized) shares these paths with nginx so it
+      # can serve ACME HTTP-01 challenges and, once issued, the certificate.
+      - ./certbot-webroot:/var/www/certbot:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+volumes:
+  media:
