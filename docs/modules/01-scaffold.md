@@ -3,7 +3,7 @@
 > Keep this file in sync with the code AT ALL TIMES.
 > If the code and this file disagree, this file is wrong. Fix it in the same commit.
 
-**Status:** Done (2026-11-02; waiting for the first commit, see Open questions)
+**Status:** Done (2026-11-02)
 **Priority:** P0
 **Ticket:** MBP-001
 **Plan reference:** docs/mybestpicks_plan_v4.md §2, §3, §8
@@ -115,14 +115,16 @@ Decisions.
 - [DECISION 2026-11-02] PostgreSQL 18 (`postgres:18`), the current major release.
   Its image keeps data under `/var/lib/postgresql/<major>`, so the volume is
   mounted at `/var/lib/postgresql`.
-- [OPEN] The first commit is blocked: git has no author identity on this machine
-  (`user.name` / `user.email` are unset). Docs and scaffold are uncommitted until
-  the owner sets one.
+- [DECISION 2026-11-02] Git author identity was unset. Set repo-local (not global) to
+  `bunny737 <bajibaba997@gmail.com>`, taken from the GitHub remote and the owner's
+  account email. Change it with `git config user.name/user.email` if you want
+  another name on future commits.
 - [OPEN] The starter search view reads `?query=`; module 06/08 docs say `?q=`.
   Decide one parameter name in module 08.
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.
+- 2026-11-02  Committed and pushed to origin/main (31fdff8).
 - 2026-11-02  Built: starter scaffold, split env-driven settings, PostgreSQL 18
   compose, pinned requirements, Dockerfile, CI, README. Ruff, `check`,
   `check --deploy`, `makemigrations --check` and the 4 starter tests pass.
