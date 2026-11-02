@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block body_class %}template-standard{% endblock %}
+
+{# Plain structure only; module 02 adds the Bootstrap layout. #}
+{% block content %}
+<main>
+    <h1>{{ page.title }}</h1>
+    {{ page.body|richtext }}
+</main>
+{% endblock %}

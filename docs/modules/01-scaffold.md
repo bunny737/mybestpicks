@@ -101,8 +101,8 @@ Decisions.
   plan §3 tree and avoids a nested `mybestpicks/mybestpicks/mybestpicks/`.
 - [DECISION 2026-11-02] Project-wide templates and static files stay where the
   starter puts them (`mybestpicks/templates/`, `mybestpicks/static/`), not at the
-  repo root as drawn in plan §3. CLAUDE.md requires the native starter layout. Delete
-  the starter's `home/templates/home/welcome_page.html` and its CSS during module 02.
+  repo root as drawn in plan §3. CLAUDE.md requires the native starter layout. The
+  starter's welcome page and CSS were deleted in module 03.
 - [DECISION 2026-11-02] Python 3.14 (owner choice). Wagtail 8.0.1 / Django 6.1.2
   were the newest releases and officially support it.
 - [DECISION 2026-11-02] Plain pinned `requirements/*.txt` (owner choice), no

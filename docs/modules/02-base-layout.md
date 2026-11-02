@@ -17,8 +17,11 @@ down to 320px.
 
 ## Templates (as planned; update to as-built)
 Wagtail gives the admin, routing and template tags, but no public theme. The
-starter's `base.html` is a bare skeleton, and its welcome page is a placeholder that
-is deleted here. Page templates follow Wagtail's naming convention,
+starter's `base.html` is a bare skeleton. Module 03 already deleted the welcome page and
+added **plain, unstyled** templates for every page type (they render and are tested);
+this module restyles them with Bootstrap, it does not create them. `base.html` already
+prints `<meta name="robots">` from the `robots_meta` context variable; keep that when
+rewriting it. Page templates follow Wagtail's naming convention,
 `<app>/<model_snake_case>.html`.
 
 ```
@@ -28,6 +31,7 @@ home/templates/home/home_page.html              hierarchy below (replaces the st
 editorial/templates/editorial/category_page.html
 editorial/templates/editorial/article_page.html
 editorial/templates/editorial/author_page.html
+editorial/templates/editorial/author_index_page.html
 editorial/templates/editorial/standard_page.html
 mybestpicks/templates/components/{product_card,comparison_table,affiliate_disclosure,breadcrumbs,telegram_cta}.html
 ```

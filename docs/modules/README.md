@@ -10,7 +10,7 @@ MBP-0xx ticket numbers ([../mybestpicks_plan_v4.md §14](../mybestpicks_plan_v4.
 | Order | # | Module | Spec file | Priority | Depends on | Target week | Status |
 |---|---|--------|-----------|---|---|---|---|
 | 1 | 01 | Project scaffold | 01-scaffold.md | P0 | none | 1 (Nov 1–7) | ✅ |
-| 2 | 03 | Page models (Home, Category, Article, Author, Standard) | 03-page-models.md | P0 | 01 | 1–2 | ⬜ |
+| 2 | 03 | Page models (Home, Category, Article, Author, Standard) | 03-page-models.md | P0 | 01 | 1–2 | ✅ |
 | 3 | 02 | Base layout and dynamic navigation | 02-base-layout.md | P0 | 01, 03 | 2 (Nov 8–14) | ⬜ |
 | 4 | 07 | Release pipeline (VPS, Compose, Nginx, backups) | 07-release-pipeline.md | P0 | 01, 02, 03 | 2 (minimal deploy) · 8 (restore rehearsal) | ⬜ |
 | 5 | 05 | Product catalog (Brand, Product, Merchant, Offer, specs) | 05-product-catalog.md | P0 | 01 | 3 (Nov 15–21) | ⬜ |

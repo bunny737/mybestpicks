@@ -1,21 +1,41 @@
 {% extends "base.html" %}
-{% load static %}
+{% load wagtailcore_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
 
-{% block extra_css %}
-
-{% comment %}
-Delete the line below if you're just getting started and want to remove the welcome screen!
-{% endcomment %}
-<link rel="stylesheet" href="{% static 'css/welcome_page.css' %}">
-{% endblock extra_css %}
-
+{# Plain structure only; module 02 adds the Bootstrap layout. #}
 {% block content %}
+<main>
+    <h1>{{ page.hero_title }}</h1>
+    {% if page.hero_text %}<p>{{ page.hero_text }}</p>{% endif %}
 
-{% comment %}
-Delete the line below if you're just getting started and want to remove the welcome screen!
-{% endcomment %}
-{% include 'home/welcome_page.html' %}
+    {% if categories %}
+    <section aria-labelledby="categories-heading">
+        <h2 id="categories-heading">Browse by category</h2>
+        <ul>
+            {% for category in categories %}
+            <li><a href="{% pageurl category %}">{{ category.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
 
-{% endblock content %}
+    {% if featured_articles %}
+    <section aria-labelledby="featured-heading">
+        <h2 id="featured-heading">Featured guides</h2>
+        <ul>
+            {% for article in featured_articles %}
+            <li><a href="{% pageurl article %}">{{ article.title }}</a></li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+    {% if page.trust_panel %}
+    <section aria-labelledby="trust-heading">
+        <h2 id="trust-heading">How we choose</h2>
+        {{ page.trust_panel|richtext }}
+    </section>
+    {% endif %}
+</main>
+{% endblock %}
