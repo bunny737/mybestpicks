@@ -119,8 +119,7 @@ Decisions.
   `bunny737 <bajibaba997@gmail.com>`, taken from the GitHub remote and the owner's
   account email. Change it with `git config user.name/user.email` if you want
   another name on future commits.
-- [OPEN] The starter search view reads `?query=`; module 06/08 docs say `?q=`.
-  Decide one parameter name in module 08.
+- [DECISION 2026-11-02] Search keeps the starter's `?query=` parameter (module 02).
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.

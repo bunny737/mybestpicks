@@ -1,10 +1,11 @@
 from django.db import models
+from django.db.models import F
 from modelcluster.fields import ParentalKey
 from wagtail.admin.panels import FieldPanel, InlinePanel
 from wagtail.fields import RichTextField
 from wagtail.models import Orderable, Page
 
-from editorial.models import CategoryPage
+from editorial.models import ArticleKind, ArticlePage, CategoryPage
 
 
 class HomePage(Page):
@@ -48,6 +49,18 @@ class HomePage(Page):
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
         context["categories"] = CategoryPage.objects.child_of(self).discoverable()
+        live_articles = (
+            ArticlePage.objects.descendant_of(self)
+            .live()
+            .select_related("author", "featured_image")
+        )
+        newest = F("first_published_at").desc(nulls_last=True)
+        context["latest_comparisons"] = live_articles.filter(
+            article_kind=ArticleKind.COMPARISON
+        ).order_by(newest)[:3]
+        context["recently_updated"] = live_articles.order_by(
+            F("last_published_at").desc(nulls_last=True)
+        )[:6]
         context["featured_articles"] = [
             item.article
             for item in self.featured_guides.select_related("article")

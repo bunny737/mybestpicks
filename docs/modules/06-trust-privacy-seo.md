@@ -40,6 +40,12 @@ Model: EmailSubscriber   app: home   (only if consent/unsubscribe can be operate
 StandardPages       About, Contact, Editorial Policy, Affiliate Disclosure, Privacy Policy, Terms
 ```
 
+## Hooks left by module 02
+`mybestpicks/templates/base.html` already has an empty `{% block extra_head %}` for the
+canonical tag, JSON-LD and the RSS `<link>`, and a marked spot in the footer for the
+RSS and Telegram links. Do not add either link until `/feed/` and the Telegram
+setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
+
 ## Business rules
 1. Every page has its own `<title>`, meta description, canonical URL (apex
    `https://mybestpicks.in/…`) and exactly one H1.

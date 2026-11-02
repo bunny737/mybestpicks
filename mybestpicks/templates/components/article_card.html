@@ -1,0 +1,11 @@
+{% load wagtailcore_tags wagtailimages_tags %}
+<div class="card h-100 position-relative">
+    {% if article.featured_image %}
+    {% image article.featured_image fill-640x360 class="card-img-top card-img-ratio" loading="lazy" %}
+    {% endif %}
+    <div class="card-body">
+        <p class="small text-body-secondary mb-1">{{ article.get_article_kind_display }}</p>
+        <h3 class="card-title h5"><a href="{% pageurl article %}">{{ article.title }}</a></h3>
+        <p class="card-text">{{ article.excerpt }}</p>
+    </div>
+</div>

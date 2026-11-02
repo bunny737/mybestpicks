@@ -3,39 +3,73 @@
 
 {% block body_class %}template-homepage{% endblock %}
 
-{# Plain structure only; module 02 adds the Bootstrap layout. #}
 {% block content %}
-<main>
-    <h1>{{ page.hero_title }}</h1>
-    {% if page.hero_text %}<p>{{ page.hero_text }}</p>{% endif %}
+<section class="hero py-5">
+    <div class="container">
+        <h1 class="display-5 fw-bold">{{ page.hero_title }}</h1>
+        {% if page.hero_text %}<p class="lead mb-0 prose">{{ page.hero_text }}</p>{% endif %}
+    </div>
+</section>
 
+<div class="container">
     {% if categories %}
-    <section aria-labelledby="categories-heading">
-        <h2 id="categories-heading">Browse by category</h2>
-        <ul>
+    <section class="my-5" aria-labelledby="categories-heading">
+        <h2 id="categories-heading" class="h3 mb-3">Browse by category</h2>
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
             {% for category in categories %}
-            <li><a href="{% pageurl category %}">{{ category.title }}</a></li>
+            <div class="col">
+                <div class="card h-100 position-relative">
+                    <div class="card-body">
+                        <h3 class="card-title h5"><a href="{% pageurl category %}">{{ category.title }}</a></h3>
+                        {% if category.introduction %}
+                        <div class="card-text small">{{ category.introduction|richtext|truncatewords_html:25 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
             {% endfor %}
-        </ul>
+        </div>
     </section>
     {% endif %}
 
     {% if featured_articles %}
-    <section aria-labelledby="featured-heading">
-        <h2 id="featured-heading">Featured guides</h2>
-        <ul>
+    <section class="my-5" aria-labelledby="featured-heading">
+        <h2 id="featured-heading" class="h3 mb-3">Featured guides</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
             {% for article in featured_articles %}
-            <li><a href="{% pageurl article %}">{{ article.title }}</a></li>
+            <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
-        </ul>
+        </div>
+    </section>
+    {% endif %}
+
+    {% if latest_comparisons %}
+    <section class="my-5" aria-labelledby="comparisons-heading">
+        <h2 id="comparisons-heading" class="h3 mb-3">Latest comparisons</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            {% for article in latest_comparisons %}
+            <div class="col">{% include "components/article_card.html" with article=article %}</div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if recently_updated %}
+    <section class="my-5" aria-labelledby="updated-heading">
+        <h2 id="updated-heading" class="h3 mb-3">Recently updated</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+            {% for article in recently_updated %}
+            <div class="col">{% include "components/article_card.html" with article=article %}</div>
+            {% endfor %}
+        </div>
     </section>
     {% endif %}
 
     {% if page.trust_panel %}
-    <section aria-labelledby="trust-heading">
-        <h2 id="trust-heading">How we choose</h2>
-        {{ page.trust_panel|richtext }}
+    <section class="my-5 p-4 bg-body-tertiary rounded" aria-labelledby="trust-heading">
+        <h2 id="trust-heading" class="h3">How we choose</h2>
+        <div class="prose">{{ page.trust_panel|richtext }}</div>
     </section>
     {% endif %}
-</main>
+</div>
 {% endblock %}

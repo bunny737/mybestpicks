@@ -1,38 +1,70 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags wagtailimages_tags layout_tags %}
 
 {% block body_class %}template-article{% endblock %}
 
-{# Plain structure only; module 02 adds the layout, module 04 the product blocks. #}
+{# Order follows plan section 5. Modules 04 adds the disclosure, quick picks and comparison table. #}
 {% block content %}
-<main>
-    <h1>{{ page.title }}</h1>
-    <p>
-        By <a href="{% pageurl page.author %}">{{ page.author.title }}</a>
-        {% if page.first_published_at %}
-        · Published <time datetime="{{ page.first_published_at|date:'Y-m-d' }}">{{ page.first_published_at|date:"j F Y" }}</time>
-        {% endif %}
-        {% if page.reviewed_date %}
-        · Reviewed <time datetime="{{ page.reviewed_date|date:'Y-m-d' }}">{{ page.reviewed_date|date:"j F Y" }}</time>
-        {% endif %}
-    </p>
-    <p>{{ page.excerpt }}</p>
+<article class="container pt-4">
+    {% breadcrumbs %}
 
-    {% include_block page.body %}
+    <header class="prose mb-4">
+        <p class="small text-body-secondary mb-1">{{ page.get_article_kind_display }}</p>
+        <h1 class="mb-3">{{ page.title }}</h1>
+        <p class="text-body-secondary mb-3">
+            By <a href="{% pageurl page.author %}">{{ page.author.title }}</a>
+            {% if page.first_published_at %}
+            · Published <time datetime="{{ page.first_published_at|date:'Y-m-d' }}">{{ page.first_published_at|date:"j F Y" }}</time>
+            {% endif %}
+            {% if page.reviewed_date %}
+            · Reviewed <time datetime="{{ page.reviewed_date|date:'Y-m-d' }}">{{ page.reviewed_date|date:"j F Y" }}</time>
+            {% endif %}
+        </p>
+        <p class="lead">{{ page.excerpt }}</p>
+    </header>
+
+    {% if page.featured_image %}
+    <figure class="mb-4">
+        {# The hero image is the likely LCP element: not lazy, high priority. #}
+        {% image page.featured_image width-1200 class="img-fluid rounded" fetchpriority="high" %}
+        {% if page.featured_image_credit %}
+        <figcaption class="small text-body-secondary mt-1">Image: {{ page.featured_image_credit }}</figcaption>
+        {% endif %}
+    </figure>
+    {% endif %}
 
     {% if page.methodology %}
-    <section aria-labelledby="methodology-heading">
-        <h2 id="methodology-heading">How we researched this</h2>
-        {{ page.methodology|richtext }}
-    </section>
+    <details class="methodology prose card card-body mb-4">
+        <summary>How we researched this</summary>
+        <div class="mt-3">{{ page.methodology|richtext }}</div>
+    </details>
     {% endif %}
+
+    <div class="prose article-body">
+        {% include_block page.body %}
+    </div>
 
     {% with tags=page.tags.all %}
     {% if tags %}
-    <ul aria-label="Tags">
-        {% for tag in tags %}<li>{{ tag.name }}</li>{% endfor %}
+    <ul class="list-inline mt-4" aria-label="Tags">
+        {% for tag in tags %}<li class="list-inline-item"><span class="badge text-bg-light border">{{ tag.name }}</span></li>{% endfor %}
     </ul>
     {% endif %}
     {% endwith %}
-</main>
+
+    {% if page.reviewed_date %}
+    <p class="small text-body-secondary mt-4">Last reviewed {{ page.reviewed_date|date:"j F Y" }}.</p>
+    {% endif %}
+</article>
+
+{% if related_articles %}
+<section class="container my-5" aria-labelledby="related-heading">
+    <h2 id="related-heading" class="h3 mb-3">Related guides</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        {% for article in related_articles %}
+        <div class="col">{% include "components/article_card.html" with article=article %}</div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

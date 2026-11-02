@@ -19,12 +19,12 @@ No Elasticsearch.
   `search/templates/search/search.html`). Extend it rather than building a new one.
 - `django.contrib.postgres` must be in `INSTALLED_APPS` (already added in module 01);
   the backend fails `manage.py check` without it.
-- The starter view reads `?query=`. Pick one parameter name (`query` or `q`) here and
-  update module 06's robots/noindex notes to match.
+- The URL parameter is `?query=` (the starter's, and what the header form in module
+  02 sends). Keep it; do not switch to `q`. The search template is already restyled.
 - `WAGTAILSEARCH_BACKENDS = {"default": {"BACKEND": "wagtail.search.backends.database"}}`
 - `ArticlePage.search_fields` indexes the title, excerpt, body text, tags and the
   author name. `CategoryPage` indexes its title and introduction.
-- `/search/?q=` returns only live, public pages and is paginated.
+- `/search/?query=` returns only live, public pages and is paginated.
 - The search box in the header (module 02) is a plain GET form that works without JS.
 
 ## Business rules

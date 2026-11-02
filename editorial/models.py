@@ -189,6 +189,18 @@ class ArticlePage(Page):
         """The one primary hub this article belongs to (its parent page)."""
         return self.get_parent().specific
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        # Other live guides in the same hub. Module 04 extends this context with
+        # the precomputed ``article_products`` (rendering contract).
+        context["related_articles"] = (
+            ArticlePage.objects.sibling_of(self, inclusive=False)
+            .live()
+            .select_related("author", "featured_image")
+            .order_by(F("first_published_at").desc(nulls_last=True))[:3]
+        )
+        return context
+
 
 # --- Category hubs -----------------------------------------------------------
 

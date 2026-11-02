@@ -1,17 +1,19 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags layout_tags %}
 
 {% block body_class %}template-authors{% endblock %}
 
-{# Plain structure only; module 02 adds the Bootstrap layout. #}
 {% block content %}
-<main>
+<div class="container pt-4">
+    {% breadcrumbs %}
     <h1>{{ page.title }}</h1>
-    {% if page.intro %}{{ page.intro|richtext }}{% endif %}
-    <ul>
+    {% if page.intro %}<div class="prose">{{ page.intro|richtext }}</div>{% endif %}
+    <ul class="list-unstyled mt-4">
         {% for author in authors %}
-        <li><a href="{% pageurl author %}">{{ author.title }}</a></li>
+        <li class="mb-2"><a href="{% pageurl author %}">{{ author.title }}</a>
+            {% if author.expertise %}<span class="text-body-secondary"> — {{ author.expertise }}</span>{% endif %}
+        </li>
         {% endfor %}
     </ul>
-</main>
+</div>
 {% endblock %}

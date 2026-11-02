@@ -1,39 +1,39 @@
 {% extends "base.html" %}
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags layout_tags %}
 
 {% block body_class %}template-category{% endblock %}
 
-{# Plain structure only; module 02 adds the Bootstrap layout. #}
 {% block content %}
-<main>
-    <h1>{{ page.title }}</h1>
-    {% if page.introduction %}{{ page.introduction|richtext }}{% endif %}
+<div class="container pt-4">
+    {% breadcrumbs %}
+    <h1 class="mb-3">{{ page.title }}</h1>
+    {% if page.introduction %}<div class="prose lead">{{ page.introduction|richtext }}</div>{% endif %}
 
     {% if featured_articles %}
-    <section aria-labelledby="featured-heading">
-        <h2 id="featured-heading">Featured guides</h2>
-        <ul>
+    <section class="my-5" aria-labelledby="featured-heading">
+        <h2 id="featured-heading" class="h3 mb-3">Featured guides</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
             {% for article in featured_articles %}
-            <li><a href="{% pageurl article %}">{{ article.title }}</a></li>
+            <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
-        </ul>
+        </div>
     </section>
     {% endif %}
 
     {% if articles %}
-    <section aria-labelledby="articles-heading">
-        <h2 id="articles-heading">All guides</h2>
-        <ul>
+    <section class="my-5" aria-labelledby="articles-heading">
+        <h2 id="articles-heading" class="h3 mb-3">All guides</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
             {% for article in articles %}
-            <li>
-                <a href="{% pageurl article %}">{{ article.title }}</a>
-                <p>{{ article.excerpt }}</p>
-            </li>
+            <div class="col">{% include "components/article_card.html" with article=article %}</div>
             {% endfor %}
-        </ul>
+        </div>
     </section>
     {% else %}
-    <p>Guides for this category are coming soon.</p>
+    <div class="my-5 p-4 bg-body-tertiary rounded prose">
+        <h2 class="h4">Guides for this category are coming soon.</h2>
+        <p class="mb-0">We only publish a guide when it has been properly researched. Check back shortly.</p>
+    </div>
     {% endif %}
-</main>
+</div>
 {% endblock %}

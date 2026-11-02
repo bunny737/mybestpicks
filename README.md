@@ -19,6 +19,7 @@ affiliate links are optional.
 | PostgreSQL | 18 (Docker image `postgres:18`) |
 | psycopg | 3.3.6 |
 | Ruff | 0.17.3 |
+| Bootstrap (vendored) | 5.3.8 |
 
 Wagtail 8.0.1 lists Python 3.14 and Django 6.1 as supported. Verified on
 2 November 2026 (module 01). Bump versions by hand and update this table.
