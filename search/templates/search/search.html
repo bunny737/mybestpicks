@@ -56,6 +56,11 @@
             <p class="h5 fw-bold text-dark mb-1">No results found for &ldquo;{{ search_query }}&rdquo;</p>
             <p class="text-secondary small mb-0">Try checking your spelling or search for broader keywords like &ldquo;keyboard&rdquo; or &ldquo;monitor&rdquo;.</p>
         </div>
+        {% else %}
+        <div class="p-4 bg-light rounded-4 text-center border my-4">
+            <p class="h5 fw-bold text-dark mb-1">Type a few words to search our guides</p>
+            <p class="text-secondary small mb-0">Try a product category like &ldquo;keyboard&rdquo; or &ldquo;monitor&rdquo;.</p>
+        </div>
         {% endif %}
     </div>
 </div>

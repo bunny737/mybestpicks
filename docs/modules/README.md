@@ -15,7 +15,7 @@ MBP-0xx ticket numbers ([../mybestpicks_plan_v4.md §14](../mybestpicks_plan_v4.
 | 4 | 05 | Product catalog (Brand, Product, Merchant, Offer, specs; product types provisional) | 05-product-catalog.md | P0 | 01 | 3 (Nov 15–21) | ✅ |
 | 5 | 04 | Editorial blocks (ProductCard, ComparisonTable, …) | 04-editorial-blocks.md | P0 | 03, 05 | 3–5 | ✅ |
 | 6 | 06 | Trust, privacy and SEO | 06-trust-privacy-seo.md | P0 | 02, 03, 04 | 2 (legal pages) · 4 (sitemap, RSS, Telegram link) | 🟨 |
-| 7 | 08 | Internal search | 08-search.md | P1 | 02, 03 | 7 | ⬜ |
+| 7 | 08 | Internal search | 08-search.md | P1 | 02, 03 | 7 | ✅ |
 | 8 | 10 | Editorial QA tooling | 10-editorial-qa.md | P1 | 04, 05 | 6–8 | ⬜ |
 | 9 | 07 | Release pipeline (VPS, Compose, Nginx, backups). **Held: no deploy until development is finished (owner, 2026-11-02)** | 07-release-pipeline.md | P0 | 01–06, 08, 10 | after development (plan had week 2) | ⬜ |
 | 10 | 09 | Metrics (Search Console, Umami, UTMs; needs a live site) | 09-metrics.md | P1 | 06, 07 | after 07 | ⬜ |
@@ -48,3 +48,11 @@ new-hub reveal gate and the MVP definition of done.
 - [OPEN] VPS provider and off-box backup destination are not chosen yet.
 - [OPEN] The existing Telegram channel URL, topic and audience are not reviewed yet
   (plan §11).
+- [DECISION 2026-11-02] Module 12 (AdSense) infrastructure (ad slot component,
+  consent-gated script tag, publisher/slot ID validation, `/ads.txt`) was built
+  ahead of the strict build order, which lists 12 as P2/post-launch depending on
+  06 and 09 (neither done). Owner reviewed and chose to keep the code rather than
+  revert it: it is disabled by default (`ADSENSE_ENABLED=False`), renders nothing,
+  and claims no program acceptance. Module 12's status stays "Not Started" and it
+  is not to be enabled or extended until 06 and 09 are actually done. Do not treat
+  this as license to build other P2 modules early.

@@ -3,7 +3,7 @@
 > Keep this file in sync with the code AT ALL TIMES.
 > If the code and this file disagree, this file is wrong. Fix it in the same commit.
 
-**Status:** Not Started
+**Status:** Done
 **Priority:** P1
 **Ticket:** MBP-008
 **Plan reference:** docs/mybestpicks_plan_v4.md §3, §14
@@ -35,8 +35,22 @@ No Elasticsearch.
    deployment.md.
 
 ## Open questions / Decisions
-- [OPEN] Include undiscoverable hubs' articles in results? Proposed yes: the
-  articles are live and indexable.
+- [DECISION 2026-11-02] Undiscoverable hubs' articles are included in results:
+  `search()` runs against `Page.objects.live().public()` with no `discovery_mode`
+  filter, since those articles are live and indexable on their own.
+- [DECISION 2026-11-02] Search is not restricted to specific page types; any live,
+  public page (home, hubs, articles, authors, standard pages) can match. The site
+  is small enough that this needs no extra filtering yet.
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.
+- 2026-11-02  Added `search_fields` to `ArticlePage` (excerpt, body, methodology,
+  tags via a `tags_text` property, related author title) and `CategoryPage`
+  (introduction). Extended the starter `search/views.py` to add `.public()`
+  (excludes view-restricted pages) alongside `.live()`, and to strip
+  whitespace-only queries so rule 3 (no query run, helpful empty state) holds.
+  Added an empty-state message for the no-query case. The `noindex,follow` meta,
+  `/search/?query=` param, and `/search/` disallow in robots.txt were already in
+  place from module 02/06. Added `search/tests/test_search.py` covering drafts,
+  view-restricted pages, empty/whitespace queries, pagination, noindex meta, and
+  that excerpt/body/tags/introduction are indexed.

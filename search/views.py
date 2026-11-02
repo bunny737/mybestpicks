@@ -11,12 +11,12 @@ from wagtail.models import Page
 
 
 def search(request):
-    search_query = request.GET.get("query", None)
+    search_query = (request.GET.get("query") or "").strip()
     page = request.GET.get("page", 1)
 
-    # Search
+    # Search. An empty or whitespace-only query runs no query (business rule 3).
     if search_query:
-        search_results = Page.objects.live().search(search_query)
+        search_results = Page.objects.live().public().search(search_query)
 
         # To log this query for use with the "Promoted search results" module:
 

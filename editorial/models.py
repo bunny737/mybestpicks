@@ -19,6 +19,7 @@ from wagtail.admin.panels import FieldPanel, InlinePanel, MultiFieldPanel
 from wagtail.fields import RichTextField, StreamField
 from wagtail.models import Orderable, Page, PageManager
 from wagtail.query import PageQuerySet
+from wagtail.search import index
 
 from catalog.provenance import ImageProvenance, validate_image_provenance
 
@@ -197,6 +198,15 @@ class ArticlePage(Page):
     )
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
+    search_fields = Page.search_fields + [
+        index.SearchField("excerpt"),
+        index.SearchField("body"),
+        index.SearchField("methodology"),
+        index.SearchField("tags_text"),
+        index.RelatedFields("author", [index.SearchField("title")]),
+        index.FilterField("article_kind"),
+    ]
+
     content_panels = [
         *Page.content_panels,
         FieldPanel("article_kind"),
@@ -232,6 +242,10 @@ class ArticlePage(Page):
     def category(self):
         """The one primary hub this article belongs to (its parent page)."""
         return self.get_parent().specific
+
+    @property
+    def tags_text(self):
+        return " ".join(tag.name for tag in self.tags.all())
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
@@ -340,6 +354,10 @@ class CategoryPage(Page):
     )
 
     objects = PageManager.from_queryset(CategoryPageQuerySet)()
+
+    search_fields = Page.search_fields + [
+        index.SearchField("introduction"),
+    ]
 
     content_panels = [
         *Page.content_panels,

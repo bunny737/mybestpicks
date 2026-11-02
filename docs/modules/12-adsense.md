@@ -33,3 +33,8 @@ views guarantees approval.
 
 ## Changelog
 - 2026-11-02  Configured strict publisher and slot ID validation, ads.txt endpoint, and consent-gated template hooks. Module remains Not Started pending launch, CMP implementation, and traffic maturation.
+- 2026-11-02  [DECISION] This code landed ahead of the strict build order (depends
+  on 06, 09; neither is done). Owner chose to keep it rather than revert, since it
+  is disabled by default and renders/claims nothing. Logged in
+  docs/modules/README.md "Open questions". Do not enable, extend, or use this as
+  precedent for building other P2 modules before their dependencies are done.
