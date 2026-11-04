@@ -106,6 +106,20 @@ def table_block(positions=(), spec_keys=(), heading=""):
     }
 
 
+def plain_table_block(data, caption="", header="row"):
+    """Raw StreamField data for a plain ``table`` block (TableBlock's own schema)."""
+    return {
+        "type": "table",
+        "value": {
+            "table_caption": caption,
+            "first_row_is_table_header": header in ("row", "both"),
+            "first_col_is_header": header in ("column", "both"),
+            "table_header_choice": header,
+            "data": data,
+        },
+    }
+
+
 class TempMediaMixin:
     """Keep image files and renditions made by a test out of the real media folder."""
 

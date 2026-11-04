@@ -4,3 +4,4 @@ Django==6.1.2
 wagtail==8.0.1
 psycopg[binary]==3.3.6
 django-environ==0.14.0
+Markdown==3.11.2

@@ -18,6 +18,7 @@ from .helpers import (
     make_article,
     make_author,
     make_category,
+    plain_table_block,
 )
 
 
@@ -69,6 +70,39 @@ class BodyBlockRenderingTests(TempMediaMixin, TestCase):
             }
         )
         self.assertNotIn("<script>alert(1)</script>", html)
+
+    def test_plain_table_with_header_row(self):
+        html = self.render(
+            plain_table_block([["Type", "Best for"], ["Oil", "Bedrooms"]])
+        )
+        table = html[html.index('<table class="table table-bordered') :]
+        table = table[: table.index("</table>")]
+        self.assertIn("<thead", table)
+        self.assertIn('<th scope="col"', table)
+        self.assertIn("<td", table)
+        self.assertIn("Bedrooms", table)
+
+    def test_plain_table_without_header_has_no_thead(self):
+        html = self.render(plain_table_block([["Oil", "Bedrooms"]], header="neither"))
+        self.assertIn('<table class="table table-bordered', html)
+        self.assertNotIn("<thead", html)
+        self.assertNotIn('<th scope="col"', html)
+        self.assertIn("Bedrooms", html)
+
+    def test_plain_table_caption_and_cells_are_escaped(self):
+        html = self.render(
+            plain_table_block(
+                [["H1", "H2"], ["<script>cell()</script>", "x"]],
+                caption="<script>caption()</script>",
+            )
+        )
+        self.assertNotIn("<script>caption()</script>", html)
+        self.assertNotIn("<script>cell()</script>", html)
+        self.assertIn("&lt;script&gt;caption()", html)
+
+    def test_empty_plain_table_renders_nothing(self):
+        html = self.render(plain_table_block([], header="neither"))
+        self.assertNotIn('<table class="table table-bordered', html)
 
     def test_key_takeaways(self):
         html = self.render(

@@ -16,11 +16,13 @@ from django.forms.utils import ErrorList
 from wagtail import blocks
 from wagtail.blocks.stream_block import StreamBlockValidationError
 from wagtail.blocks.struct_block import StructBlockValidationError
+from wagtail.contrib.table_block.blocks import TableBlock
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.snippets.blocks import SnippetChooserBlock
 
 from catalog.provenance import ImageProvenance, validate_image_provenance
 from catalog.specs import comparable_spec_choices
+from editorial.markdown_render import render_markdown
 
 BODY_RICH_TEXT_FEATURES = [
     "h2",
@@ -301,10 +303,50 @@ class RelatedArticlesBlock(blocks.StructBlock):
         return context
 
 
+class PlainTableBlock(TableBlock):
+    """Plain reference table; never a product comparison (invariant 3) or prices."""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault(
+            "help_text",
+            "A plain reference table only. Not for comparing this article's products "
+            "(use 'Comparison table') and never a price column.",
+        )
+        super().__init__(**kwargs)
+
+    class Meta:
+        icon = "table"
+        label = "Table"
+        template = "editorial/blocks/table_block.html"
+
+
+class MarkdownBlock(blocks.TextBlock):
+    """Pasted markdown, rendered on the server. Raw HTML and images are not allowed."""
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("rows", 20)
+        kwargs.setdefault(
+            "help_text",
+            "Paste markdown: headings, bold, lists, links and tables. Raw HTML and "
+            "images are not supported (use an Image block). No affiliate links or "
+            "prices here; use product cards.",
+        )
+        super().__init__(**kwargs)
+
+    def render_basic(self, value, context=None):
+        return render_markdown(value)
+
+    class Meta:
+        icon = "code"
+        label = "Markdown"
+
+
 class ArticleBody(blocks.StreamBlock):
     paragraph = blocks.RichTextBlock(features=BODY_RICH_TEXT_FEATURES)
+    markdown = MarkdownBlock()
     heading = HeadingBlock()
     image = ImageBlock()
+    table = PlainTableBlock()
     key_takeaways = KeyTakeawaysBlock()
     buying_criteria = BuyingCriteriaBlock()
     product_card = ProductCardBlock()

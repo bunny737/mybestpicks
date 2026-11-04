@@ -22,8 +22,12 @@ Code: `editorial/blocks.py` (`ArticleBody` is the body's `StreamBlock`),
 
 ```
 paragraph          rich text (h2-h4, bold, italic, lists, links)
+markdown           pasted markdown text (headings, lists, links, tables), rendered on the
+                   server by editorial/markdown_render.py; no raw HTML, no images
 heading            text + level (H2/H3); H1 is always the page title
 image              image, alt_text (required), caption, provenance (required), credit
+table              plain TableBlock (Wagtail contrib): caption, header row/column toggle
+                   plain reference tables only; NOT for product comparisons
 key_takeaways      heading + 1-8 points
 buying_criteria    heading + criteria (name, why)
 product_card       product (ProductChooserBlock → catalog.Product)
@@ -132,6 +136,34 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   Cuelinks and must never imply Amazon Associate status.
 - [DECISION 2026-11-02] FAQ answers render as visible headings and text (not
   collapsed), so they are in the server HTML. FAQ structured data is module 06.
+- [DECISION 2026-11-03] Added a `table` block (`PlainTableBlock`, a thin subclass of
+  `wagtail.contrib.table_block.blocks.TableBlock`) so editors can paste a simple table
+  from Excel, Google Sheets or Word instead of building it by hand. No new dependency:
+  the contrib app ships inside the pinned `wagtail` package and is now in
+  `INSTALLED_APPS`. It is a sibling of `comparison_table`, not a replacement:
+  `comparison_table` stays the only block that compares this article's products
+  (invariant 3), and `table` knows nothing about product cards. Cell text is escaped
+  (the `text` renderer; the template never uses `|safe`). Its help text warns against
+  product comparisons and prices; nothing enforces that, because cell text cannot be
+  checked reliably. Needed migration `editorial.0005`, since this Wagtail version keeps
+  the StreamField block definition in migration state.
+- [DECISION 2026-11-04] Added a `markdown` block (`MarkdownBlock`, a `TextBlock`
+  rendered by `editorial/markdown_render.py`) so an editor can paste a whole article
+  as markdown. The owner approved the one new dependency, `Markdown==3.11.2`, pinned
+  in `requirements/base.txt` and `constraints.txt`. Output is server-rendered HTML
+  (invariant 1). Pasted text is untrusted, so the renderer is deliberately narrow:
+  raw HTML is escaped (the `html_block` preprocessor and `html` inline pattern are
+  removed), images are dropped (invariant 8: every image needs recorded provenance, so
+  use an Image block), links must be http(s), mailto, relative or `#` (anything else,
+  such as `javascript:`, is unwrapped to plain text), and `#` becomes H2 because the
+  page title is the H1. External links get `rel="noopener"` only: an affiliate link
+  pasted here would carry no `sponsored` rel and would bypass the disclosure rule
+  (invariants 6 and 7), so the help text says to use product cards instead. Nothing
+  enforces that, as with prices. Tables get the same Bootstrap classes and scroll
+  wrapper as the `table` block. Needed migration `editorial.0006`.
+- [DECISION 2026-11-03] The `paragraph` block already accepts markdown-style typing
+  shortcuts and rich text pasted from Google Docs or Word; only plain-text markdown
+  needed the new block above.
 - [OPEN] Body `image` blocks create their renditions one query per image (only product
   and evidence images are prefetched). Fine for a few images per article; revisit with
   real performance data.
@@ -145,3 +177,9 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   block templates, quick picks, migration `editorial.0003`, 78 new tests (241 in
   total). Mutation-checked the evidence, disclosure, renderable-offer and query-count
   rules. Visually checked an article with cards and a table at 320px.
+- 2026-11-03  Added the plain `table` block (`PlainTableBlock`), its template,
+  migration `editorial.0005` and 5 tests (338 in total).
+- 2026-11-04  Added the `markdown` block, `editorial/markdown_render.py`, the pinned
+  `Markdown==3.11.2` dependency, migration `editorial.0006` and 10 tests (348 in
+  total). Checked the renderer against raw HTML, `javascript:`/`data:` links, images
+  and reference-style images.

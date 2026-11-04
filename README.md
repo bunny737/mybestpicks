@@ -43,6 +43,8 @@ Open http://localhost:8000/ and http://localhost:8000/admin/.
 
 - `requirements/base.txt`, `production.txt` and `dev.txt` list **direct**
   dependencies, each pinned with `==`.
+- `Markdown` renders the article body's Markdown block (see
+  `docs/modules/04-editorial-blocks.md`).
 - `requirements/constraints.txt` pins the full resolved set, including
   transitive packages. Install with `-c requirements/constraints.txt`.
 - Dependabot is **off** by owner decision. To update by hand: change the pins in

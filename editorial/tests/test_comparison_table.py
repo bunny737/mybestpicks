@@ -13,6 +13,7 @@ from .helpers import (
     make_article,
     make_author,
     make_category,
+    plain_table_block,
     table_block,
 )
 
@@ -222,3 +223,9 @@ class ComparisonTableValidationTests(TestCase):
 
     def test_a_table_does_not_need_to_follow_its_cards(self):
         self.clean(table_block(), card_block(self.a), card_block(self.b))
+
+    def test_a_plain_table_neither_satisfies_nor_breaks_the_comparison_rules(self):
+        plain = plain_table_block([["a", "b"], ["1", "2"]])
+        self.clean(card_block(self.a), card_block(self.b), plain, table_block())
+        with self.assertRaises(ValidationError):
+            self.clean(card_block(self.a), plain, table_block())
