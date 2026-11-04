@@ -53,10 +53,15 @@ Key docs:
 1. SERVER-RENDERED CONTENT. The full article text, headings, tables and links are
    in the HTML response. No essential SEO content may depend on client-side JS.
 
-2. NO PRICES. No price columns, price widgets or scraped prices anywhere in the
-   MVP. A title that depends on price ("under ₹1,000") needs a recent
-   `last_verified_at` and a re-verification task (default 30 days). Rewrite the
-   title if it is not verified.
+2. PRICES ONLY AS DATED EDITORIAL TEXT (owner decision 2026-11-04, relaxing the
+   original "no prices"). A price may appear only as editor-supplied text inside an
+   article, with an "as of <date>" stamp next to it (for example "₹1,499 as of
+   4 Nov 2026"). Still no price fields on `Product` or `MerchantOffer`, no price
+   columns or widgets driven by data, and no scraped or fetched prices. Buttons and
+   CTAs never show a price. Price text older than 30 days is re-verified or removed.
+   A title that depends on price ("under ₹1,000") needs a recent `last_verified_at`
+   and a re-verification task (default 30 days). Rewrite the title if it is not
+   verified.
 
 3. ONE SOURCE OF EDITORIAL JUDGEMENT. Product facts (`Product` snippet) are
    global and reusable. Verdicts, pros and cons, ranking, labels and evidence for
@@ -156,8 +161,9 @@ Console and Umami need a live site.
   image-rights behaviour.
 - A task needs a new dependency, a new service (Redis, Celery, object storage,
   Elasticsearch) or a change to the stack above.
-- A task adds price data, click logging, scraping, user accounts or comments.
-  All of these are out of scope.
+- A task adds price fields or stored price data, click logging, scraping, user
+  accounts or comments. All of these are out of scope. (Dated prices written as
+  article text are allowed; see invariant 2.)
 - A new `product_type` is needed (it requires `catalog/specs.py` and tests).
   Confirm the spec keys first.
 - Any deploy, or any change to production DNS, the existing `mybestpicks.in`

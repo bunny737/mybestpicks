@@ -43,8 +43,8 @@
     </details>
     {% endif %}
 
-    {# The disclosure comes before everything that can contain a CTA (the product cards in the body). #}
-    {% if has_active_offers %}{% include "components/affiliate_disclosure.html" %}{% endif %}
+    {# The disclosure comes before everything that can contain a CTA (product cards, or affiliate links pasted in a markdown block). #}
+    {% if has_affiliate_links %}{% include "components/affiliate_disclosure.html" %}{% endif %}
 
     {% if quick_picks %}
     <section class="prose quick-picks-panel mb-5" aria-labelledby="quick-picks-heading">

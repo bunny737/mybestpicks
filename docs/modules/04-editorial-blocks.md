@@ -94,7 +94,8 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
    shows a price. Inactive offers, disabled merchants, discontinued products and
    hosts no longer in the allowlist produce no button. (`test_product_cards`)
 6. The disclosure renders once, before the first CTA, and only when an offer will
-   render; offers that will not render never trigger it. It makes no programme claims
+   render or the body holds a marked affiliate link pasted into a `markdown` block
+   (`test_markdown_block`); offers that will not render never trigger it. It makes no programme claims
    (no "Amazon", "Associate", merchant names). (`test_disclosure`)
 7. Rendering N cards uses a constant number of queries (`test_rendering_contract`).
 8. Wagtail's reference index finds the articles that use a product, and swapping a
@@ -177,6 +178,36 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   apply to HTML as well as markdown. Markdown inside an HTML block is not converted
   (no `md_in_html`). No migration: the help text and label are not part of the saved
   block definition.
+- [DECISION 2026-11-04] **Affiliate links may be written straight into a `markdown`
+  block** (owner decision; the owner's Amazon and Cuelinks accounts are accepted and the
+  owner does not use product cards for these articles). This extends invariants 6 and 7
+  to pasted links rather than relaxing them. `ArticlePage.get_context()` calls
+  `render_markdown_blocks()` once, before the body renders: one query reads the tracking
+  hosts of **enabled** merchants (`Merchant.allowed_link_domains`; none when the body has
+  no markdown block). A pasted link whose exact host is on that list and which passes
+  `validate_affiliate_url` (https, no credential-like query) gets
+  `rel="sponsored nofollow noopener"`. A link to an affiliate host that fails (plain
+  http, `token=` in the query) is unwrapped to text, never published unmarked. Other
+  external links stay `rel="noopener"`. Matching is by exact host text; nothing is
+  fetched or resolved (no SSRF). The page context gains `has_affiliate_links` (product
+  offers OR markdown affiliate links), which now drives the one disclosure above the
+  body, so it still appears before the first CTA and only when a marked link will
+  render. `has_active_offers` is unchanged. Limits: an affiliate link whose host is not
+  on a merchant's list (a new `amzn.to` or `linksredirect.com` host, say) is published
+  as a plain link with no disclosure, so add every tracking host to the merchant first;
+  the CTA wording ("View at Flipkart", "Check price at Amazon") and the no-prices rule
+  are not enforced by code. Links in the `paragraph` rich text or `source_note` blocks
+  are not covered. No migration.
+- [DECISION 2026-11-04] **Dated prices are allowed as article text** (owner decision;
+  CLAUDE.md invariant 2 was rewritten). A price may be written into a `markdown`
+  block, `paragraph` or table only with an "as of <date>" stamp beside it. Nothing
+  else changed: no price fields on `Product` or `MerchantOffer`, no data-driven price
+  columns, no scraped prices, and CTAs never show a price. Code does not check the
+  stamp or the age of a price; the writer instructions
+  (`docs/ai-writer-instructions.md`) and the 30-day re-check in
+  `docs/editorial-workflow.md` carry that rule. Open: an `editorial_audit` category
+  that flags priced text older than 30 days. The owner should also check the Amazon
+  and Flipkart programme terms on showing prices.
 - [DECISION 2026-11-03] The `paragraph` block already accepts markdown-style typing
   shortcuts and rich text pasted from Google Docs or Word; only plain-text markdown
   needed the new block above.
@@ -201,3 +232,7 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   and reference-style images.
 - 2026-11-04  The `markdown` block now also accepts simple HTML through an allowlist
   (label "Markdown / HTML"); 8 new tests for it (356 in total), no migration.
+- 2026-11-04  Affiliate links pasted into a `markdown` block are now marked
+  `sponsored nofollow noopener` when their host is on an enabled merchant's list, and
+  trigger the single disclosure (`render_markdown_blocks()`, `has_affiliate_links`);
+  15 new tests (371 in total), no migration.

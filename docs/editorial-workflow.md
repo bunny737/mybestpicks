@@ -47,7 +47,12 @@ If no legal image exists, use a text and spec card. Plan image sourcing into eac
 article's research time.
 
 ## 5. Prices
-- Never write a price into the content or a widget.
+- A price may appear only as text in an article, with an "as of <date>" stamp beside it
+  (for example "₹1,499 as of 4 Nov 2026"). The date is the day you checked the price
+  yourself. Never copy a price without checking it, and never put one in a button,
+  widget or catalog field.
+- Re-check or delete any price older than 30 days. Check the Amazon and Flipkart
+  programme terms on showing prices before relying on this.
 - A title like "under ₹1,000" needs a recent `last_verified_at` on the products it
   references. Re-verify every 30 days, or sooner for volatile categories. If it is
   unverified, rewrite the title so it is price-neutral.

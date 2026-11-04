@@ -20,8 +20,9 @@ from dataclasses import dataclass, field
 
 from wagtail.images.models import Image
 
-from catalog.models import MerchantOffer
+from catalog.models import Merchant, MerchantOffer
 from catalog.specs import SpecRow, spec_rows
+from editorial.markdown_render import render_markdown_with_links
 
 # Rendition filter specs used by the product card template. They must match the
 # `{% image ... %}` tags there so the prefetched renditions are the ones used.
@@ -112,6 +113,43 @@ def resolve_article_products(body):
         has_active_offers=first_cta is not None,
         first_cta_block_id=first_cta.block_id if first_cta else None,
     )
+
+
+@dataclass
+class MarkdownBlocks:
+    """Rendered ``markdown`` blocks of one article, keyed by their pasted text."""
+
+    html: dict = field(default_factory=dict)
+    has_affiliate_links: bool = False
+
+
+def render_markdown_blocks(body):
+    """
+    Render every ``markdown`` block once, before the page renders, so the page knows
+    whether the body holds an affiliate link (the disclosure sits above the body).
+
+    One query loads the enabled merchants' tracking hosts; an article with no
+    markdown block runs none.
+    """
+    texts = {
+        child.value for child in body if child.block_type == "markdown" and child.value
+    }
+    if not texts:
+        return MarkdownBlocks()
+    hosts = {
+        line.strip().lower()
+        for allowed in Merchant.objects.filter(enabled=True).values_list(
+            "allowed_link_domains", flat=True
+        )
+        for line in allowed.splitlines()
+        if line.strip()
+    }
+    result = MarkdownBlocks()
+    for text in texts:
+        html, has_links = render_markdown_with_links(text, hosts)
+        result.html[text] = html
+        result.has_affiliate_links = result.has_affiliate_links or has_links
+    return result
 
 
 def _attach_images(resolved):

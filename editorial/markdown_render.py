@@ -9,10 +9,15 @@ recorded provenance, CLAUDE.md invariant 8), links may only be http(s), mailto,
 relative or in-page, and H1 becomes H2 because the page title is always the H1.
 """
 
+from urllib.parse import urlsplit
+
 import markdown
 from bs4 import BeautifulSoup
 from bs4.element import PreformattedString
+from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
+
+from catalog.validators import validate_affiliate_url
 
 SAFE_LINK_SCHEMES = ("http://", "https://", "mailto:", "/", "#")
 
@@ -73,7 +78,28 @@ def _sanitise(soup):
             _clean_attributes(tag)
 
 
-def render_markdown(text):
+def _link_host(href):
+    try:
+        return (urlsplit(href).hostname or "").lower()
+    except ValueError:
+        return ""
+
+
+def render_markdown_with_links(text, affiliate_hosts=None):
+    """
+    Render ``text`` and report whether it holds an affiliate link.
+
+    ``affiliate_hosts`` is the set of tracking hostnames merchants may use
+    (``Merchant.allowed_link_domains``, invariant 6). A link to one of them must be
+    a clean https URL and then gets ``rel="sponsored nofollow noopener"``; if it is
+    not (for example plain http) it is unwrapped to text, never published unmarked.
+    The host is only compared as text: nothing is fetched or resolved.
+
+    Returns ``(html, has_affiliate_links)``.
+    """
+    affiliate_hosts = {h.lower() for h in (affiliate_hosts or ())}
+    has_affiliate_links = False
+
     html = _new_converter().convert(text or "")
     soup = BeautifulSoup(html, "html.parser")
     _sanitise(soup)
@@ -84,7 +110,16 @@ def render_markdown(text):
             link.unwrap()
             continue
         if href.lower().startswith(("http://", "https://")):
-            link["rel"] = "noopener"
+            if _link_host(href) in affiliate_hosts:
+                try:
+                    validate_affiliate_url(href, affiliate_hosts)
+                except ValidationError:
+                    link.unwrap()
+                    continue
+                link["rel"] = "sponsored nofollow noopener"
+                has_affiliate_links = True
+            else:
+                link["rel"] = "noopener"
 
     for heading in soup.find_all("h1"):
         heading.name = "h2"
@@ -97,4 +132,8 @@ def render_markdown(text):
         wrapper = soup.new_tag("div", attrs={"class": "table-scroll my-4"})
         table.wrap(wrapper)
 
-    return mark_safe(str(soup))  # noqa: S308 - sanitised above
+    return mark_safe(str(soup)), has_affiliate_links  # noqa: S308 - sanitised above
+
+
+def render_markdown(text, affiliate_hosts=None):
+    return render_markdown_with_links(text, affiliate_hosts)[0]

@@ -24,7 +24,7 @@ from wagtail.search import index
 from catalog.provenance import ImageProvenance, validate_image_provenance
 
 from .blocks import ArticleBody
-from .rendering import resolve_article_products
+from .rendering import render_markdown_blocks, resolve_article_products
 
 # A hub in "auto" mode is discoverable once it has this many live articles.
 DISCOVERY_AUTO_MIN_ARTICLES = 3
@@ -256,12 +256,19 @@ class ArticlePage(Page):
         products = resolve_article_products(self.body)
         context["article_products"] = products.entries
         context["has_active_offers"] = products.has_active_offers
+        # Pasted markdown/HTML blocks are rendered here too, so the disclosure above
+        # the body also covers affiliate links written straight into the text.
+        markdown = render_markdown_blocks(self.body)
+        context["markdown_html"] = markdown.html
+        context["has_affiliate_links"] = (
+            products.has_active_offers or markdown.has_affiliate_links
+        )
         context["affiliate_disclosure_page"] = (
             StandardPage.objects.live()
             .public()
             .filter(slug="affiliate-disclosure")
             .first()
-            if products.has_active_offers
+            if context["has_affiliate_links"]
             else None
         )
         context["first_cta_block_id"] = products.first_cta_block_id

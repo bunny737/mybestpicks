@@ -26,7 +26,7 @@ MBP-0xx ticket numbers ([../mybestpicks_plan_v4.md §14](../mybestpicks_plan_v4.
 
 ## Cross-cutting (enforced in every module, not built once)
 - Server-rendered content (CLAUDE.md invariant 1)
-- No price fields anywhere (invariant 2)
+- No price fields anywhere; prices only as dated article text (invariant 2, relaxed 2026-11-04)
 - Article judgement only in StreamField product cards (invariants 3 and 4)
 - `discovery_mode` is the only rule for visibility (invariant 5)
 - Affiliate link and disclosure rules apply whenever an offer renders (invariants 6 and 7)

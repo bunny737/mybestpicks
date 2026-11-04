@@ -329,11 +329,18 @@ class MarkdownBlock(blocks.TextBlock):
             "help_text",
             "Paste markdown or simple HTML: headings, bold, lists, links and tables. "
             "Scripts, styles, embeds and images are removed (use an Image block). "
-            "No affiliate links or prices here; use product cards.",
+            "Affiliate links are fine as plain https links: those on an allowed "
+            "merchant host are marked sponsored and the disclosure appears "
+            "automatically. Write a price only with an 'as of <date>' beside it.",
         )
         super().__init__(**kwargs)
 
     def render_basic(self, value, context=None):
+        # ArticlePage.get_context() renders every markdown block up front (so the
+        # page knows about affiliate links); fall back for previews and tests.
+        rendered = (context or {}).get("markdown_html") or {}
+        if value in rendered:
+            return rendered[value]
         return render_markdown(value)
 
     class Meta:

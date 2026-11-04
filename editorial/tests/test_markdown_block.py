@@ -1,6 +1,10 @@
+from django.db import connection
 from django.test import SimpleTestCase, TestCase
+from django.test.utils import CaptureQueriesContext
 
-from editorial.markdown_render import render_markdown
+from catalog.models import Merchant
+from catalog.tests.helpers import GOOD_LINK, make_merchant
+from editorial.markdown_render import render_markdown, render_markdown_with_links
 from editorial.models import DiscoveryMode
 
 from .helpers import make_article, make_author, make_category
@@ -136,6 +140,146 @@ class RenderMarkdownTests(SimpleTestCase):
     def test_empty_input_renders_nothing(self):
         self.assertEqual(render_markdown(""), "")
         self.assertEqual(render_markdown(None), "")
+
+
+HOSTS = {"track.example.test"}
+AFF = "https://track.example.test/c/abc?cid=1"
+
+
+class AffiliateLinkRenderingTests(SimpleTestCase):
+    def test_allowed_host_link_is_marked_sponsored_nofollow_noopener(self):
+        html, found = render_markdown_with_links(f"[View at Shopmart]({AFF})", HOSTS)
+        self.assertTrue(found)
+        self.assertIn('rel="sponsored nofollow noopener"', html)
+        self.assertIn(f'href="{AFF}"', html)
+
+    def test_other_links_stay_plain_noopener_and_report_nothing(self):
+        html, found = render_markdown_with_links("[x](https://maker.example/p)", HOSTS)
+        self.assertFalse(found)
+        self.assertIn('rel="noopener"', html)
+        self.assertNotIn("sponsored", html)
+
+    def test_no_known_hosts_means_no_affiliate_links(self):
+        html, found = render_markdown_with_links(f"[x]({AFF})", None)
+        self.assertFalse(found)
+        self.assertNotIn("sponsored", html)
+
+    def test_http_link_to_an_affiliate_host_is_unwrapped_not_published(self):
+        html, found = render_markdown_with_links(
+            "[x](http://track.example.test/c/abc)", HOSTS
+        )
+        self.assertFalse(found)
+        self.assertNotIn("<a", html)
+        self.assertIn("x", html)
+
+    def test_credential_looking_query_is_unwrapped(self):
+        html, found = render_markdown_with_links(
+            "[x](https://track.example.test/c?token=abc)", HOSTS
+        )
+        self.assertFalse(found)
+        self.assertNotIn("<a", html)
+
+    def test_subdomain_and_lookalike_hosts_are_not_affiliate_hosts(self):
+        for url in (
+            "https://sub.track.example.test/x",
+            "https://track.example.test.evil.example/x",
+            "https://evil.example/?u=track.example.test",
+        ):
+            with self.subTest(url=url):
+                html, found = render_markdown_with_links(f"[x]({url})", HOSTS)
+                self.assertFalse(found)
+                self.assertNotIn("sponsored", html)
+
+    def test_html_anchor_is_marked_too_and_its_own_rel_is_ignored(self):
+        html, found = render_markdown_with_links(
+            f'<p><a href="{AFF}" rel="nofollow" class="btn" target="_blank">Go</a></p>',
+            HOSTS,
+        )
+        self.assertTrue(found)
+        self.assertIn('rel="sponsored nofollow noopener"', html)
+        self.assertNotIn("btn", html)
+        self.assertNotIn("target", html)
+
+    def test_a_link_inside_a_table_cell_counts(self):
+        html, found = render_markdown_with_links(
+            f"| A |\n|---|\n| [Buy]({AFF}) |", HOSTS
+        )
+        self.assertTrue(found)
+        self.assertIn('rel="sponsored nofollow noopener"', html)
+
+
+class MarkdownAffiliatePageTests(TestCase):
+    MARKER = "affiliate-disclosure"
+
+    def setUp(self):
+        self.merchant = make_merchant()  # allows track.example.test
+        self.hub = make_category(mode=DiscoveryMode.FORCE_SHOW)
+        self.author = make_author()
+
+    def page(self, text, slug="heaters"):
+        article = make_article(
+            self.hub,
+            self.author,
+            slug=slug,
+            body=[
+                {"type": "paragraph", "value": "<p>Intro.</p>"},
+                {"type": "markdown", "value": text},
+            ],
+        )
+        return self.client.get(article.url).content.decode()
+
+    def test_affiliate_link_in_markdown_shows_disclosure_before_the_body(self):
+        html = self.page(f"## Pick\n\n[View at Shopmart]({GOOD_LINK})")
+        self.assertEqual(html.count(self.MARKER), 1)
+        self.assertIn('rel="sponsored nofollow noopener"', html)
+        self.assertLess(html.index(self.MARKER), html.index("Intro."))
+        self.assertLess(html.index(self.MARKER), html.index('rel="sponsored'))
+
+    def test_two_affiliate_links_still_show_one_disclosure(self):
+        html = self.page(f"[a]({GOOD_LINK})\n\n[b]({GOOD_LINK}&n=2)")
+        self.assertEqual(html.count(self.MARKER), 1)
+        self.assertEqual(html.count('rel="sponsored'), 2)
+
+    def test_no_affiliate_link_means_no_disclosure(self):
+        html = self.page("## Pick\n\n[Maker](https://maker.example/p)")
+        self.assertNotIn(self.MARKER, html)
+        self.assertNotIn("sponsored", html)
+
+    def test_disabled_merchant_links_are_not_affiliate_links(self):
+        Merchant.objects.update(enabled=False)
+        html = self.page(f"[x]({GOOD_LINK})")
+        self.assertNotIn(self.MARKER, html)
+        self.assertNotIn("sponsored", html)
+
+    def test_removing_the_host_from_the_allowlist_removes_marking_and_disclosure(self):
+        Merchant.objects.update(allowed_link_domains="other.example.test")
+        html = self.page(f"[x]({GOOD_LINK})")
+        self.assertNotIn(self.MARKER, html)
+        self.assertNotIn("sponsored", html)
+
+    def test_markdown_blocks_add_one_query_not_one_per_block(self):
+        body = [
+            {"type": "markdown", "value": f"[{i}]({GOOD_LINK}&n={i})"} for i in range(5)
+        ]
+        one = make_article(self.hub, self.author, slug="one", body=body[:1])
+        five = make_article(self.hub, self.author, slug="five", body=body)
+        self.client.get(one.url)  # warm per-process caches (site, content types)
+        with CaptureQueriesContext(connection) as q1:
+            self.client.get(one.url)
+        with CaptureQueriesContext(connection) as q5:
+            self.client.get(five.url)
+        self.assertEqual(len(q1), len(q5))
+
+    def test_article_without_markdown_runs_no_merchant_query(self):
+        article = make_article(
+            self.hub,
+            self.author,
+            slug="plain",
+            body=[{"type": "paragraph", "value": "<p>Hi</p>"}],
+        )
+        with CaptureQueriesContext(connection) as queries:
+            self.client.get(article.url)
+        self.assertFalse([q for q in queries if "catalog_merchant" in q["sql"].lower()])
 
 
 class MarkdownBlockPageTests(TestCase):
