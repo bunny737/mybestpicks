@@ -1,0 +1,18 @@
+{% load wagtailcore_tags %}
+{# Google Analytics 4 consent banner (module 09, invariant 9). #}
+{# Renders only when GA4_MEASUREMENT_ID is set. The gtag script is NOT in this HTML: #}
+{# mybestpicks.js injects it only after the visitor clicks Accept. #}
+{% if ga4_measurement_id %}
+<div id="analytics-consent" class="analytics-consent" role="region"
+     aria-label="Analytics preference" data-ga4-id="{{ ga4_measurement_id }}" tabindex="-1" hidden>
+    <p class="mb-2 small">
+        We would like to use Google Analytics to see which guides are read. It sets
+        cookies and sends anonymised usage data to Google. It stays off unless you accept.
+        {% if privacy_policy_page %}<a href="{% pageurl privacy_policy_page %}">Privacy policy</a>.{% endif %}
+    </p>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-sm btn-primary" data-analytics-choice="granted">Accept</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-analytics-choice="denied">Decline</button>
+    </div>
+</div>
+{% endif %}

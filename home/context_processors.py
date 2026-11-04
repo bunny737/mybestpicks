@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.functional import SimpleLazyObject
@@ -133,9 +135,21 @@ def _get_adsense_config(request):
     }
 
 
+GA4_ID_RE = re.compile(r"^G-[A-Z0-9]{6,12}$")
+
+
+def _ga4_measurement_id(request):
+    """GA4 ID from settings, or "" when unset, malformed or in the preview panel."""
+    if getattr(request, "in_preview_panel", False):
+        return ""
+    value = (getattr(settings, "GA4_MEASUREMENT_ID", "") or "").strip()
+    return value if GA4_ID_RE.match(value) else ""
+
+
 def site_navigation(request):
     adsense_config = SimpleLazyObject(lambda: _get_adsense_config(request))
     return {
+        "ga4_measurement_id": _ga4_measurement_id(request),
         "nav_categories": SimpleLazyObject(lambda: _nav_categories(request)),
         "footer_pages": SimpleLazyObject(lambda: _footer_pages(request)),
         "privacy_policy_page": SimpleLazyObject(lambda: _privacy_policy_page(request)),

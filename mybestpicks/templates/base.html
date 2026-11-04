@@ -125,10 +125,13 @@
             </div>
 
             <div class="border-top border-secondary border-opacity-25 mt-4 pt-4 text-secondary small">
-                <p class="mb-0">&copy; {% now "Y" %} MyBestPicks.in. All rights reserved.</p>
+                <p class="mb-0">&copy; {% now "Y" %} MyBestPicks.in. All rights reserved.
+                    {% if ga4_measurement_id %}&middot; <a href="#analytics-consent" data-analytics-reopen>Analytics settings</a>{% endif %}</p>
             </div>
         </div>
     </footer>
+
+    {% include "components/analytics_consent.html" %}
 
     <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/mybestpicks.js' %}"></script>

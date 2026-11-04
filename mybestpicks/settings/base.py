@@ -227,6 +227,11 @@ WAGTAILDOCS_EXTENSIONS = [
 WAGTAILDOCS_MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 
 
+# Google Analytics 4 (module 09). Optional and off while empty. The Measurement ID
+# is public (it appears in page source once consent is given), so it is not a secret.
+# The gtag script is injected by JavaScript only after the visitor accepts.
+GA4_MEASUREMENT_ID = env("GA4_MEASUREMENT_ID", default="")
+
 # Google AdSense defaults (Module 12, P2/post-launch; disabled by default)
 ADSENSE_PUBLISHER_ID = env("ADSENSE_PUBLISHER_ID", default="")
 ADSENSE_ENABLED = env.bool("ADSENSE_ENABLED", default=False)

@@ -44,7 +44,24 @@ impressions, clicks, queries and CTR · Umami visits, top pages and referrals,
 including `utm_source=telegram` · RSS and email opt-ins · hosting cost and
 editorial time.
 
+## GA4 as built (2026-11-04)
+- `GA4_MEASUREMENT_ID` env setting (empty = off). `home.context_processors` exposes
+  `ga4_measurement_id` only if it matches `^G-[A-Z0-9]{6,12}$` and the request is not
+  the Wagtail preview panel.
+- `components/analytics_consent.html` (included from `base.html`) renders an
+  Accept/Decline banner only when an ID is set. The Google script is **never** in the
+  server HTML; `static/js/mybestpicks.js` injects `gtag.js` only when the
+  `analytics_consent=granted` cookie exists or the visitor clicks Accept.
+- Decline (or "Analytics settings" in the footer, then Decline) removes `_ga*` cookies.
+  The choice cookie lasts 180 days, is first-party, and is separate from `ads_consent`.
+- Tests: `seo/tests/test_ga4.py`. The `affiliate_click` event is not built yet.
+- Status stays Not Started: Search Console and Umami are still open.
+
 ## Open questions / Decisions
+- 2026-11-04  Owner supplied the standard Google tag. It was NOT pasted as-is,
+  because it would track visitors before consent (invariant 9). Built consent-gated
+  instead. This also gives the previously deferred consent banner a minimal first
+  version for GA4 only; the wider banner decision in module 06 is still open.
 - [OPEN] Umami hosting: the same VPS (simplest) or separate. A privacy review is
   needed either way.
 
