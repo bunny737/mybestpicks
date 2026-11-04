@@ -28,15 +28,88 @@ class RenderMarkdownTests(SimpleTestCase):
         self.assertIn("<td>2</td>", html)
         self.assertIn('class="table-scroll', html)
 
-    def test_raw_html_is_escaped_not_rendered(self):
+    def test_simple_html_is_accepted(self):
         html = render_markdown(
-            '<script>alert(1)</script>\n\n<div onclick="x()">hi</div>\n\n'
-            '<iframe src="https://evil.example"></iframe>'
+            "<h2>Sizing</h2>\n\n<p>Pick <strong>oil</strong> and <em>quartz</em> "
+            'heaters. <a href="https://a.in/x" title="T">Guide</a></p>\n\n'
+            "<ul><li>one</li><li>two</li></ul>"
         )
-        self.assertNotIn("<script", html)
-        self.assertNotIn("<div onclick", html)
-        self.assertNotIn("<iframe", html)
-        self.assertIn("&lt;script&gt;", html)
+        self.assertIn("<h2>Sizing</h2>", html)
+        self.assertIn("<strong>oil</strong>", html)
+        self.assertIn("<em>quartz</em>", html)
+        self.assertIn(
+            '<a href="https://a.in/x" rel="noopener" title="T">Guide</a>', html
+        )
+        self.assertIn("<li>two</li>", html)
+
+    def test_html_and_markdown_can_be_mixed(self):
+        html = render_markdown("## Heading\n\n<p>Para <b>bold</b></p>\n\n- item")
+        self.assertIn("<h2>Heading</h2>", html)
+        self.assertIn("<b>bold</b>", html)
+        self.assertIn("<li>item</li>", html)
+
+    def test_html_tables_get_the_same_classes_and_wrapper(self):
+        html = render_markdown(
+            "<table><thead><tr><th>A</th></tr></thead>"
+            '<tbody><tr><td colspan="2" onclick="x()">1</td></tr></tbody></table>'
+        )
+        self.assertIn('<table class="table table-bordered', html)
+        self.assertIn('class="table-scroll', html)
+        self.assertIn('<th scope="col">A</th>', html)
+        self.assertIn('<td colspan="2">1</td>', html)
+        self.assertNotIn("onclick", html)
+
+    def test_html_h1_becomes_h2(self):
+        html = render_markdown("<h1>Title</h1>")
+        self.assertIn("<h2>Title</h2>", html)
+        self.assertNotIn("<h1", html)
+
+    def test_scripts_styles_and_embeds_are_removed_with_their_contents(self):
+        html = render_markdown(
+            "<p>Keep</p><script>alert(1)</script><style>p{x:y}</style>"
+            '<iframe src="https://evil.example">inner</iframe>'
+            '<object data="x">o</object><form action="/x"><button>Go</button></form>'
+        )
+        self.assertIn("<p>Keep</p>", html)
+        for bad in ("script", "alert", "style", "iframe", "inner", "object", "form"):
+            self.assertNotIn(bad, html)
+        self.assertNotIn("Go", html)
+
+    def test_event_handlers_styles_classes_and_ids_are_removed(self):
+        html = render_markdown(
+            '<p onclick="x()" style="color:red" class="big" id="a">Text</p>'
+            '<a href="https://a.in" onmouseover="x()" target="_blank">L</a>'
+        )
+        self.assertIn("<p>Text</p>", html)
+        for bad in ("onclick", "onmouseover", "style", 'class="big"', "id=", "target"):
+            self.assertNotIn(bad, html)
+
+    def test_unknown_wrapper_tags_are_unwrapped_but_keep_their_text(self):
+        html = render_markdown("<div><span>Hello</span> <font>there</font></div>")
+        self.assertIn("Hello", html)
+        self.assertIn("there", html)
+        for bad in ("<div", "<span", "<font"):
+            self.assertNotIn(bad, html)
+
+    def test_html_images_and_comments_are_removed(self):
+        html = render_markdown(
+            '<p>A<img src="https://a.in/p.png" onerror="x()"><!-- secret --></p>'
+        )
+        self.assertNotIn("<img", html)
+        self.assertNotIn("onerror", html)
+        self.assertNotIn("secret", html)
+        self.assertIn("<p>A</p>", html)
+
+    def test_unsafe_html_link_schemes_are_unwrapped(self):
+        html = render_markdown(
+            '<a href="javascript:alert(1)">a</a> <a href="  JaVaScRiPt:x">b</a> '
+            '<a href="java&#9;script:x">c</a> <a href="data:text/html,x">d</a> '
+            '<a href="vbscript:x">e</a>'
+        )
+        self.assertNotIn("href=", html)
+        self.assertNotIn("<a", html)
+        for text in "abcde":
+            self.assertIn(text, html)
 
     def test_images_are_dropped(self):
         html = render_markdown("![x](https://a.in/p.png)\n\n![y][ref]\n\n[ref]: /p.png")

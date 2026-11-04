@@ -321,15 +321,15 @@ class PlainTableBlock(TableBlock):
 
 
 class MarkdownBlock(blocks.TextBlock):
-    """Pasted markdown, rendered on the server. Raw HTML and images are not allowed."""
+    """Pasted markdown or simple HTML, cleaned and rendered on the server."""
 
     def __init__(self, **kwargs):
         kwargs.setdefault("rows", 20)
         kwargs.setdefault(
             "help_text",
-            "Paste markdown: headings, bold, lists, links and tables. Raw HTML and "
-            "images are not supported (use an Image block). No affiliate links or "
-            "prices here; use product cards.",
+            "Paste markdown or simple HTML: headings, bold, lists, links and tables. "
+            "Scripts, styles, embeds and images are removed (use an Image block). "
+            "No affiliate links or prices here; use product cards.",
         )
         super().__init__(**kwargs)
 
@@ -338,7 +338,7 @@ class MarkdownBlock(blocks.TextBlock):
 
     class Meta:
         icon = "code"
-        label = "Markdown"
+        label = "Markdown / HTML"
 
 
 class ArticleBody(blocks.StreamBlock):

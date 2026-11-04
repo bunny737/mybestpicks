@@ -1,33 +1,82 @@
 """
-Server-side markdown for the article ``markdown`` block.
+Server-side markdown (and HTML) for the article ``markdown`` block.
 
-Pasted markdown is untrusted text, so this is deliberately narrow: raw HTML is
-escaped (not parsed), images are dropped (every image needs recorded provenance,
-CLAUDE.md invariant 8), links may only be http(s), mailto, relative or in-page, and
-H1 becomes H2 because the page title is always the H1.
+Pasted text is untrusted, so the output is cleaned against an allowlist after
+markdown is converted: only simple text, list, link and table tags survive, every
+attribute except a few on links and table cells is removed, scripts, styles and
+embeds are dropped with their contents, images are dropped (every image needs
+recorded provenance, CLAUDE.md invariant 8), links may only be http(s), mailto,
+relative or in-page, and H1 becomes H2 because the page title is always the H1.
 """
 
 import markdown
 from bs4 import BeautifulSoup
+from bs4.element import PreformattedString
 from django.utils.safestring import mark_safe
 
 SAFE_LINK_SCHEMES = ("http://", "https://", "mailto:", "/", "#")
 
+ALLOWED_TAGS = {
+    "p", "br", "hr",
+    "h1", "h2", "h3", "h4", "h5", "h6",
+    "strong", "b", "em", "i", "u", "del", "s", "sub", "sup", "small", "code", "pre",
+    "blockquote", "ul", "ol", "li",
+    "a",
+    "table", "caption", "thead", "tbody", "tfoot", "tr", "th", "td",
+}  # fmt: skip
+
+# Removed together with everything inside them; other unknown tags keep their text.
+DROP_WITH_CONTENT = {
+    "script", "style", "iframe", "object", "embed", "applet", "noscript", "template",
+    "svg", "math", "form", "textarea", "select", "option", "button", "head", "title",
+    "img", "picture", "video", "audio", "source", "track", "canvas", "link", "meta",
+}  # fmt: skip
+
+ALLOWED_ATTRIBUTES = {
+    "a": {"href", "title"},
+    "th": {"colspan", "rowspan", "scope"},
+    "td": {"colspan", "rowspan", "scope"},
+}
+
 
 def _new_converter():
     md = markdown.Markdown(extensions=["tables", "sane_lists"])
-    md.preprocessors.deregister("html_block")
-    for name in ("html", "image_link", "image_reference", "short_image_ref"):
+    for name in ("image_link", "image_reference", "short_image_ref"):
         md.inlinePatterns.deregister(name)
     return md
+
+
+def _clean_attributes(tag):
+    allowed = ALLOWED_ATTRIBUTES.get(tag.name, set())
+    for name in list(tag.attrs):
+        if name not in allowed:
+            del tag[name]
+    for name in ("colspan", "rowspan"):
+        if name in tag.attrs and not str(tag[name]).strip().isdigit():
+            del tag[name]
+
+
+def _sanitise(soup):
+    for node in soup.find_all(string=lambda s: isinstance(s, PreformattedString)):
+        node.extract()  # comments, CDATA, doctype, processing instructions
+
+    for tag in soup.find_all(True):
+        if tag.decomposed:
+            continue
+        if tag.name in DROP_WITH_CONTENT:
+            tag.decompose()
+
+    for tag in soup.find_all(True):
+        if tag.name not in ALLOWED_TAGS:
+            tag.unwrap()
+        else:
+            _clean_attributes(tag)
 
 
 def render_markdown(text):
     html = _new_converter().convert(text or "")
     soup = BeautifulSoup(html, "html.parser")
-
-    for img in soup.find_all("img"):
-        img.decompose()
+    _sanitise(soup)
 
     for link in soup.find_all("a"):
         href = (link.get("href") or "").strip()

@@ -22,8 +22,9 @@ Code: `editorial/blocks.py` (`ArticleBody` is the body's `StreamBlock`),
 
 ```
 paragraph          rich text (h2-h4, bold, italic, lists, links)
-markdown           pasted markdown text (headings, lists, links, tables), rendered on the
-                   server by editorial/markdown_render.py; no raw HTML, no images
+markdown           pasted markdown or simple HTML (headings, lists, links, tables), cleaned
+                   and rendered on the server by editorial/markdown_render.py;
+                   scripts, styles, embeds and images are removed
 heading            text + level (H2/H3); H1 is always the page title
 image              image, alt_text (required), caption, provenance (required), credit
 table              plain TableBlock (Wagtail contrib): caption, header row/column toggle
@@ -152,15 +153,30 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   as markdown. The owner approved the one new dependency, `Markdown==3.11.2`, pinned
   in `requirements/base.txt` and `constraints.txt`. Output is server-rendered HTML
   (invariant 1). Pasted text is untrusted, so the renderer is deliberately narrow:
-  raw HTML is escaped (the `html_block` preprocessor and `html` inline pattern are
-  removed), images are dropped (invariant 8: every image needs recorded provenance, so
-  use an Image block), links must be http(s), mailto, relative or `#` (anything else,
-  such as `javascript:`, is unwrapped to plain text), and `#` becomes H2 because the
-  page title is the H1. External links get `rel="noopener"` only: an affiliate link
+  images are dropped (invariant 8: every image needs recorded provenance, so use an
+  Image block), links must be http(s), mailto, relative or `#` (anything else, such as
+  `javascript:`, is unwrapped to plain text), and `#` becomes H2 because the page
+  title is the H1. (Raw HTML handling was first "escape it"; see the next decision.)
+  External links get `rel="noopener"` only: an affiliate link
   pasted here would carry no `sponsored` rel and would bypass the disclosure rule
   (invariants 6 and 7), so the help text says to use product cards instead. Nothing
   enforces that, as with prices. Tables get the same Bootstrap classes and scroll
   wrapper as the `table` block. Needed migration `editorial.0006`.
+- [DECISION 2026-11-04] The `markdown` block also accepts simple HTML (labelled
+  "Markdown / HTML"; the block name `markdown` is unchanged so stored data keeps
+  working). The first version escaped raw HTML; the owner asked for HTML support, so
+  the renderer now keeps raw HTML and cleans it against an allowlist in
+  `editorial/markdown_render.py` instead (no new dependency; BeautifulSoup is already
+  installed with Wagtail). Allowed: `p br hr h1-h6 strong b em i u del s sub sup small
+  code pre blockquote ul ol li a table caption thead tbody tfoot tr th td`. Only
+  `href`/`title` on links and `colspan`/`rowspan`/`scope` on cells survive; every other
+  attribute (`style`, `class`, `id`, `on*`, `target`) is removed. `script`, `style`,
+  `iframe`, `object`, `form`, `svg`, `img` and similar are removed together with their
+  contents; other unknown tags such as `div`, `span` and `font` are unwrapped and keep
+  their text; comments are removed. The link-scheme, image, H1 and table rules above
+  apply to HTML as well as markdown. Markdown inside an HTML block is not converted
+  (no `md_in_html`). No migration: the help text and label are not part of the saved
+  block definition.
 - [DECISION 2026-11-03] The `paragraph` block already accepts markdown-style typing
   shortcuts and rich text pasted from Google Docs or Word; only plain-text markdown
   needed the new block above.
@@ -183,3 +199,5 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   `Markdown==3.11.2` dependency, migration `editorial.0006` and 10 tests (348 in
   total). Checked the renderer against raw HTML, `javascript:`/`data:` links, images
   and reference-style images.
+- 2026-11-04  The `markdown` block now also accepts simple HTML through an allowlist
+  (label "Markdown / HTML"); 8 new tests for it (356 in total), no migration.
