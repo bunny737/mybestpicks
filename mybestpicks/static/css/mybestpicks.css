@@ -84,19 +84,6 @@ main:focus {
 /* --------------------------------------------------------------------------
    Header, Navigation & Search
    -------------------------------------------------------------------------- */
-.top-trust-bar {
-    background-color: var(--mbp-slate-900);
-    color: #cbd5e1;
-    font-size: 0.75rem;
-    letter-spacing: 0.03em;
-    padding: 0.35rem 0;
-}
-
-.top-trust-bar a {
-    color: #e2e8f0;
-    text-decoration: underline;
-}
-
 .site-header {
     background: #ffffff;
     position: relative;
