@@ -118,6 +118,15 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   queries. (`test_product_cards`, `test_rendering_contract`)
 
 ## Open questions / Decisions
+- 2026-11-05  Markdown block: an affiliate link (host on a Merchant's allowlist, valid
+  https) that is the only content of its own paragraph renders as a button with our own
+  classes (`btn btn-primary`, paragraph `my-3`). Links inside sentences, table cells and
+  non-affiliate links never become buttons. Pasted `class`, `style` and `target` are
+  still stripped, so the look comes from the site CSS only. Link text is not enforced
+  ("Check price at Amazon" / "View at Flipkart" stays an editor rule). Requested after
+  an Amazon `link.amazon` link pasted with inline styles lost its styling; the owner
+  confirmed the Amazon Associates account is accepted. The Amazon Merchant snippet
+  (allowed link domain `link.amazon`) is created in the admin, not in code.
 - [DECISION 2026-11-02] **Quick picks is a template section, not a block.** It lists
   the cards that have a `recommendation_label` (with their `best_for`), links to each
   card, and is omitted when no card has a label. One less block for editors to place,
@@ -236,3 +245,5 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   `sponsored nofollow noopener` when their host is on an enabled merchant's list, and
   trigger the single disclosure (`render_markdown_blocks()`, `has_affiliate_links`);
   15 new tests (371 in total), no migration.
+- 2026-11-05  Markdown block: a lone affiliate link renders as a button (5 new tests, plus
+  an updated one).

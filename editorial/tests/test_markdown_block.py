@@ -192,13 +192,55 @@ class AffiliateLinkRenderingTests(SimpleTestCase):
 
     def test_html_anchor_is_marked_too_and_its_own_rel_is_ignored(self):
         html, found = render_markdown_with_links(
-            f'<p><a href="{AFF}" rel="nofollow" class="btn" target="_blank">Go</a></p>',
+            f'<p><a href="{AFF}" rel="nofollow" class="evil" style="x:y" '
+            f'target="_blank">Go</a></p>',
             HOSTS,
         )
         self.assertTrue(found)
         self.assertIn('rel="sponsored nofollow noopener"', html)
-        self.assertNotIn("btn", html)
+        self.assertNotIn("evil", html)
+        self.assertNotIn("style", html)
         self.assertNotIn("target", html)
+
+    def test_affiliate_link_alone_on_its_line_becomes_a_button(self):
+        for source in (
+            f"[Check price at Amazon]({AFF})",
+            f'<a href="{AFF}" style="background:#f90">Check price at Amazon</a>',
+            f'<p><a href="{AFF}">Check price at Amazon</a></p>',
+        ):
+            with self.subTest(source=source):
+                html, found = render_markdown_with_links(source, HOSTS)
+                self.assertTrue(found)
+                self.assertIn('class="btn btn-primary"', html)
+                self.assertIn('rel="sponsored nofollow noopener"', html)
+                self.assertNotIn("background", html)
+
+    def test_affiliate_link_inside_a_sentence_stays_a_text_link(self):
+        html, found = render_markdown_with_links(f"Buy it [here]({AFF}) today.", HOSTS)
+        self.assertTrue(found)
+        self.assertNotIn("btn", html)
+        self.assertIn('rel="sponsored nofollow noopener"', html)
+
+    def test_non_affiliate_link_alone_on_its_line_is_never_a_button(self):
+        html, found = render_markdown_with_links(
+            "[Maker](https://maker.example/p)", HOSTS
+        )
+        self.assertFalse(found)
+        self.assertNotIn("btn", html)
+
+    def test_pasted_classes_never_make_a_button(self):
+        html, _ = render_markdown_with_links(
+            '<p><a href="https://maker.example/p" class="btn btn-primary">Go</a></p>',
+            HOSTS,
+        )
+        self.assertNotIn("btn", html)
+
+    def test_button_in_a_table_cell_is_not_restyled(self):
+        html, found = render_markdown_with_links(
+            f"| A |\n|---|\n| [Buy]({AFF}) |", HOSTS
+        )
+        self.assertTrue(found)
+        self.assertNotIn("btn", html)
 
     def test_a_link_inside_a_table_cell_counts(self):
         html, found = render_markdown_with_links(

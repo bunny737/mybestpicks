@@ -85,6 +85,25 @@ def _link_host(href):
         return ""
 
 
+def _is_alone_in_paragraph(link):
+    """True when ``link`` is the only content of its own ``<p>`` (a line by itself)."""
+    paragraph = link.parent
+    if paragraph is None or paragraph.name != "p":
+        return False
+    others = [
+        child
+        for child in paragraph.children
+        if child is not link and (getattr(child, "name", None) or str(child).strip())
+    ]
+    return not others
+
+
+def _style_as_button(link):
+    """Our own button classes; pasted classes and styles are never kept."""
+    link["class"] = ["btn", "btn-primary"]
+    link.parent["class"] = ["my-3"]
+
+
 def render_markdown_with_links(text, affiliate_hosts=None):
     """
     Render ``text`` and report whether it holds an affiliate link.
@@ -94,6 +113,10 @@ def render_markdown_with_links(text, affiliate_hosts=None):
     a clean https URL and then gets ``rel="sponsored nofollow noopener"``; if it is
     not (for example plain http) it is unwrapped to text, never published unmarked.
     The host is only compared as text: nothing is fetched or resolved.
+
+    An affiliate link that sits alone in its paragraph (a line by itself) renders as
+    a button, styled with our own classes. A link inside a sentence stays a text
+    link, and only affiliate links are ever styled as buttons.
 
     Returns ``(html, has_affiliate_links)``.
     """
@@ -118,6 +141,8 @@ def render_markdown_with_links(text, affiliate_hosts=None):
                     continue
                 link["rel"] = "sponsored nofollow noopener"
                 has_affiliate_links = True
+                if _is_alone_in_paragraph(link):
+                    _style_as_button(link)
             else:
                 link["rel"] = "noopener"
 

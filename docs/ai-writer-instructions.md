@@ -105,7 +105,9 @@ Markdown that works:
   Flipkart. Don't use "Buy now", "Best deal", "Lowest price" or "Check price on
   Amazon".
 - Put the link on its own line directly under the product's "Who should buy it?"
-  section. Don't use HTML buttons, `class=` or `style=`. They are removed.
+  section. A supplied affiliate link that sits alone on its line is shown as a
+  button automatically. Don't use HTML buttons, `class=` or `style=`. They are
+  removed. A link inside a sentence stays a normal text link.
 - Never write an affiliate disclosure and never mention Amazon Associates or
   Cuelinks. The site adds the disclosure automatically above the article.
 - Don't link to shopping sites except with the supplied affiliate URLs. Other links
