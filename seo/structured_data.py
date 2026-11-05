@@ -68,7 +68,6 @@ def structured_data(page):
             "author": {
                 "@type": "Person",
                 "name": page.author.title,
-                "url": public_url(page.author.url),
             },
             "publisher": {
                 "@type": "Organization",
@@ -76,6 +75,9 @@ def structured_data(page):
                 "url": public_url("/"),
             },
         }
+        # An unpublished author page would 404, so only point to a live one.
+        if page.author.live:
+            article["author"]["url"] = public_url(page.author.url)
         if page.first_published_at:
             article["datePublished"] = page.first_published_at.isoformat()
         if page.last_published_at:

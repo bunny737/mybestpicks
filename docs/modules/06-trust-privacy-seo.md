@@ -152,6 +152,20 @@ setting exist. `robots.txt` should disallow `/search/` (it is a `?query=` URL).
 - [OPEN] The seeded policy page copy still needs the owner's review and sign-off
   before publishing (and professional advice for the Privacy Policy specifically,
   per plan §6: DPDP) — it is draft text, not vetted legal copy.
+- [DECISION 2026-11-05] Production copy for About, Contact, Affiliate Disclosure,
+  Terms and Privacy Policy was written at the owner's request and applied to
+  production as **draft revisions** by one-off `manage.py shell` scripts (not
+  committed; data, not code). The owner reviews and publishes each page in Wagtail.
+  The Privacy Policy now describes what is actually built: consent-gated GA4 with
+  the `analytics_consent` cookie (180 days), no Umami, no advertising, and
+  double opt-in email that is deleted on unsubscribe. The Affiliate Disclosure names
+  Amazon Associates and Cuelinks, following the module 04 record that both accounts
+  are accepted. Editorial Policy stays a draft and is not linked from these pages.
+  Professional review of the Privacy Policy and Terms is still recommended.
+- [DECISION 2026-11-05] The article byline and the `BlogPosting` JSON-LD link to
+  the author page only when it is live. The live room-heaters article linked to an
+  unpublished "Author1" page, which returned 404. The author is still named either
+  way. Tests: `seo/tests/test_structured_data.py`.
 
 ## Changelog
 - 2026-11-02  Created stub from plan v4.

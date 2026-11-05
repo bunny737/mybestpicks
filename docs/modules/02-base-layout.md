@@ -109,6 +109,11 @@ Each rule maps to a test in `home/tests/test_layout.py` unless noted.
   and the Telegram setting do not exist until module 06, and a link to a missing URL
   is worse than none. `base.html` has comments marking where they go.
 - [OPEN] Brand assets (logo, favicon, final colours) are not supplied yet.
+- [DECISION 2026-11-05] Footer blurb reworded. "We verify specs, test where
+  possible" implied hands-on testing that live articles disclaim (invariant 8), and
+  "never recommend products solely for commission" implied commission partly
+  decides picks. It now reads: "We date our facts, say clearly when we have not
+  tested a product ourselves, and never let commission decide what we recommend."
 - [OPEN] Budget-buying collections on the home page (plan §5 item 6) are skipped
   until price bounds can be re-verified; there is no price data in the MVP.
 - [OPEN] An automated 320px check (for example Playwright in CI) would replace the

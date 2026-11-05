@@ -14,7 +14,8 @@
         </div>
         <h1 class="display-6 fw-bold text-dark mb-3">{{ page.title }}</h1>
         <div class="article-meta-bar">
-            <span>By <a href="{% pageurl page.author %}" class="fw-semibold text-decoration-none">{{ page.author.title }}</a></span>
+            {# Link the author only when their page is live, so the byline never points at a 404. #}
+            <span>By {% if page.author.live %}<a href="{% pageurl page.author %}" class="fw-semibold text-decoration-none">{{ page.author.title }}</a>{% else %}<span class="fw-semibold">{{ page.author.title }}</span>{% endif %}</span>
             {% if page.first_published_at %}
             <span>&middot; Published <time datetime="{{ page.first_published_at|date:'Y-m-d' }}">{{ page.first_published_at|date:"j F Y" }}</time></span>
             {% endif %}

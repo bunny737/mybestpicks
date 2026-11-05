@@ -51,6 +51,31 @@ class StructuredDataTests(TestCase):
             ["Home", "Developer Setup", "A trustworthy guide"],
         )
 
+    def test_live_author_is_linked_in_byline_and_json_ld(self):
+        article = make_article(self.hub, self.author)
+
+        response = self.client.get(article.url)
+
+        self.assertEqual(
+            json_ld(response)["@graph"][0]["author"]["url"],
+            "https://mybestpicks.in/authors/asha-rao/",
+        )
+        self.assertContains(response, f'href="{self.author.url}"')
+
+    def test_unpublished_author_is_named_but_never_linked(self):
+        self.author.unpublish()
+        article = make_article(self.hub, self.author)
+
+        response = self.client.get(article.url)
+
+        author = json_ld(response)["@graph"][0]["author"]
+        self.assertEqual(author["name"], self.author.title)
+        self.assertNotIn("url", author)
+        self.assertContains(
+            response, f'By <span class="fw-semibold">{self.author.title}'
+        )
+        self.assertNotContains(response, 'href="/authors/asha-rao/"')
+
     def test_category_has_breadcrumbs_but_no_article_markup(self):
         data = json_ld(self.client.get(self.hub.url))
 
