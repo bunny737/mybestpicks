@@ -200,6 +200,16 @@ class AffiliateLinkRenderingTests(SimpleTestCase):
         self.assertIn('rel="sponsored nofollow noopener"', html)
         self.assertNotIn("evil", html)
         self.assertNotIn("style", html)
+        self.assertIn('target="_blank"', html)  # ours, not the pasted value
+
+    def test_affiliate_links_open_in_a_new_tab_other_links_do_not(self):
+        html, _ = render_markdown_with_links(f"[x]({AFF})", HOSTS)
+        self.assertIn('target="_blank"', html)
+        html, _ = render_markdown_with_links("[x](https://maker.example/p)", HOSTS)
+        self.assertNotIn("target", html)
+        html, _ = render_markdown_with_links(
+            '<a href="https://maker.example/p" target="_blank">x</a>', HOSTS
+        )
         self.assertNotIn("target", html)
 
     def test_affiliate_link_alone_on_its_line_becomes_a_button(self):

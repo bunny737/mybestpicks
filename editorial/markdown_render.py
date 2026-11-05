@@ -114,6 +114,9 @@ def render_markdown_with_links(text, affiliate_hosts=None):
     not (for example plain http) it is unwrapped to text, never published unmarked.
     The host is only compared as text: nothing is fetched or resolved.
 
+    Affiliate links open in a new tab (``target="_blank"``, set here, never taken
+    from the pasted text; ``noopener`` is already in their ``rel``).
+
     An affiliate link that sits alone in its paragraph (a line by itself) renders as
     a button, styled with our own classes. A link inside a sentence stays a text
     link, and only affiliate links are ever styled as buttons.
@@ -140,6 +143,7 @@ def render_markdown_with_links(text, affiliate_hosts=None):
                     link.unwrap()
                     continue
                 link["rel"] = "sponsored nofollow noopener"
+                link["target"] = "_blank"  # ours, never copied from pasted HTML
                 has_affiliate_links = True
                 if _is_alone_in_paragraph(link):
                     _style_as_button(link)
