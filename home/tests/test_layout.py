@@ -249,7 +249,7 @@ class ArticleLayoutTests(TestCase):
         self.assertRegex(card.group(0), r'width="\d+"')
         self.assertRegex(card.group(0), r'height="\d+"')
 
-    def test_methodology_is_in_the_html_and_collapsible(self):
+    def test_methodology_box_is_not_shown_on_the_article_page(self):
         article = make_article(
             self.hub,
             self.author,
@@ -257,8 +257,8 @@ class ArticleLayoutTests(TestCase):
             methodology="<p>We compared forty spec sheets.</p>",
         )
         html = self.client.get(article.url).content.decode()
-        self.assertIn("<details", html)
-        self.assertIn("We compared forty spec sheets.", html)
+        self.assertNotIn("How we researched this", html)
+        self.assertNotIn("We compared forty spec sheets.", html)
 
 
 class HomeSectionsTests(TestCase):

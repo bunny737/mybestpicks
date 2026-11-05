@@ -66,8 +66,8 @@ of cards (measured: identical for 2 and for 9 cards, each with an image, an offe
 an evidence photo). An article with no cards runs no catalog query at all.
 
 ## Article page order (as-built)
-breadcrumb → title, author, dates, short answer → hero image → methodology
-(collapsible) → **affiliate disclosure (only if `has_active_offers`)** → quick picks →
+breadcrumb → title, author, dates, short answer → hero image →
+**affiliate disclosure (only if `has_active_offers`)** → quick picks →
 body → public sources, tags, last reviewed → related guides. The disclosure sits
 before the body because every CTA is inside a body product card, so it is always
 before the first CTA whatever order the editor builds.
@@ -118,6 +118,9 @@ Each rule maps to a test in `editorial/tests/` (file in brackets).
   queries. (`test_product_cards`, `test_rendering_contract`)
 
 ## Open questions / Decisions
+- 2026-11-05  Removed the "How we researched this" box from the article page at the
+  owner's request. `ArticlePage.methodology` stays in the model and admin (no
+  migration) but is no longer shown to readers; a test checks it stays hidden.
 - 2026-11-05  Markdown block: an affiliate link (host on a Merchant's allowlist, valid
   https) that is the only content of its own paragraph renders as a button with our own
   classes (`btn btn-primary`, paragraph `my-3`). Links inside sentences, table cells and

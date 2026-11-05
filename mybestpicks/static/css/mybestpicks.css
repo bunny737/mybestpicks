@@ -664,30 +664,6 @@ main:focus {
     margin-bottom: 1.75rem;
 }
 
-details.methodology {
-    border: 1px solid var(--mbp-slate-200);
-    border-radius: var(--mbp-radius-lg);
-    background-color: var(--mbp-slate-50);
-    transition: background-color 0.15s ease;
-}
-
-details.methodology[open] {
-    background-color: #ffffff;
-}
-
-details.methodology > summary {
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 0.9375rem;
-    color: var(--mbp-slate-800);
-    padding: 0.85rem 1.15rem;
-    user-select: none;
-}
-
-details.methodology > summary:hover {
-    color: var(--mbp-accent);
-}
-
 .breadcrumb {
     --bs-breadcrumb-divider: "\203A";
     font-size: 0.875rem;
